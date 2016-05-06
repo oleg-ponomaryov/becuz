@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+
+    <title>Becuz main App</title>
+
+    <!--/*/ <th:block th:include="fragments/headerinc :: head"></th:block> /*/-->
+</head>
+<body>
+<div class="container">
+    <!--/*/ <th:block th:include="fragments/header :: header"></th:block> /*/-->
+    <div th:if="${not #lists.isEmpty(users)}">
+        <h2>User List</h2>
+        <table class="table table-striped">
+            <tr>
+                <th>User Id</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>View</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}"><a href="/user/${user.id}">User Id</a></td>
+                <td th:text="${user.email}">Email</td>
+                <td th:text="${user.role}">Role</td>
+                <td><a th:href="${ '/user/' + user.id}">View</a></td>
+                <td><a th:href="${'/user/edit/' + user.id}">Edit</a></td>
+                <td><a th:href="${'/user/delete/' + user.id}">Delete</a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

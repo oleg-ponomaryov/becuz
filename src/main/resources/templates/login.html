@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<title>Login Page</title>
+</head>
+<body>
+	<p>Initially use demo@quantlance.com with password:demo</p>
+
+	<div th:if="${param.error}">Invalid username and password.</div>
+	<form th:action="@{/login}" method="post">
+		<div>
+			<label> Email : <input type="text" name="email" />
+			</label>
+		</div>
+		<div>
+			<label> Password: <input type="password" name="password" />
+			</label>
+		</div>
+		<div>
+			 <label for="remember-me">Remember me:</label>
+			<input type="checkbox" name="remember-me" id="remember-me"/>		
+		</div>
+		<div>
+			<input type="submit" value="Sign In" />
+		</div>
+	</form>
+	
+	   <!--  <p sec:authorize="isAuthenticated()">You just logged in, <strong><span th:text="${user.username}"></span></strong>. Great job!</p>  -->
+	    
+	    <!-- Facebook image -->
+	    <!--  <p><img th:src="${user.imageUrl}" width="95" height="95" sec:authorize="isAuthenticated()" /></p> -->
+	    
+	    <!-- Provide action buttons based on login state -->
+	    <form id="facebook-login"  action="/connect/facebook" method="POST" sec:authorize="isAnonymous()">
+			<input type="hidden" name="scope" value="public_profile,email" />
+			<input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+			<button type="submit">Log me in with facebook</button>
+		</form>	
+</body>
+</html>

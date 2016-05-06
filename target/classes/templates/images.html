@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+
+    <title>Becuz main App</title>
+
+    <!--/*/ <th:block th:include="fragments/headerinc :: head"></th:block> /*/-->
+</head>
+<body>
+<div class="container">
+    <!--/*/ <th:block th:include="fragments/header :: header"></th:block> /*/-->
+    <div th:if="${not #lists.isEmpty(images)}">
+        <h2>Image List</h2>
+        <table class="table table-striped">
+            <tr>
+                <th>Id</th>
+                <th>Owner</th>
+                <th>Original Key</th>
+                <th>Thumbnail Key</th>
+                <th>Title</th>
+                <th>View</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            
+            <tr th:each="image : ${images}">
+                <td th:text="${image.id}"><a href="/image/${image.id}">Id</a></td>
+                <td th:text="${image.owner}">Owner</td>
+                <td th:text="${image.originalKey}">Original Key</td>
+                <td th:text="${image.thumbnailKey}">Thumbnail Key</td>
+                <td th:text="${image.title}">Title</td>
+                <td><a th:href="${ '/image/' + image.id}">View</a></td>
+                <td><a th:href="${'/image/' + image.id}">Edit</a></td>
+                <td><a th:href="${'/image/' + image.id+'?delete'}">Delete</a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
