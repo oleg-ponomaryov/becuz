@@ -82,14 +82,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.deleteCookies("remember-me").logoutSuccessUrl("/").and()
 				.rememberMe();
 		//http.csrf().disable();
-
 		// remove this !!!!
 		http.authorizeRequests().antMatchers("/").permitAll().and()
 				.authorizeRequests().antMatchers("/console/**").permitAll();
 
-		// http.csrf().disable();
 		http.headers().frameOptions().disable();
-
 	}
 
 	@Override
