@@ -34,8 +34,8 @@
 	    
 	    <!-- Provide action buttons based on login state -->
 	    <form id="facebook-login"  action="/connect/facebook" method="POST" sec:authorize="isAnonymous()">
-			<input type="hidden" name="scope" value="public_profile,email" />
-			<input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+			<input type="hidden" name="scope" value="public_profile,email,user_photos" />
+			<!-- <input type="hidden" name="_csrf" th:value="${_csrf.token}" />  -->
 			<button type="submit">Log me in with facebook</button>
 		</form>	
 </body>

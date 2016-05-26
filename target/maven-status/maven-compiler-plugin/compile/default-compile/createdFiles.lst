@@ -17,6 +17,7 @@ co/becuz/social/dto/SocialDTO.class
 co/becuz/util/ImageUploadFormSigner.class
 co/becuz/repositories/UserRepository.class
 co/becuz/social/interceptor/FacebookConnectInterceptor.class
+co/becuz/controllers/FaceBookController.class
 co/becuz/domain/Image.class
 co/becuz/configuration/ConfigurationSettings.class
 co/becuz/social/service/impl/UserTaskServiceImpl.class

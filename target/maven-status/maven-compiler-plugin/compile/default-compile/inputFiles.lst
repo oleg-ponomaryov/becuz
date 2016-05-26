@@ -1,8 +1,11 @@
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/controllers/FaceBookController.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/repositories/UserRepository.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/ImageService.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/domain/User.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/dto/response/StaticImage.java
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/filters/FacebookUserDetails.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/dto/response/StaticImageResponse.java
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/filters/FacebookTokenAuthenticationFilter.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/controllers/UserController.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/currentuser/CurrentUserDetailsService.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/controllers/ImageController.java

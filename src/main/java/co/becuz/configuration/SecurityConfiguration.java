@@ -21,18 +21,23 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.connect.UsersConnectionRepository;
 import org.springframework.social.connect.jdbc.JdbcUsersConnectionRepository;
 import org.springframework.social.connect.support.ConnectionFactoryRegistry;
 import org.springframework.social.connect.web.ConnectController;
+import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.connect.FacebookConnectionFactory;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 
+import co.becuz.filters.FacebookTokenAuthenticationFilter;
 import co.becuz.social.interceptor.FacebookConnectInterceptor;
 import co.becuz.social.service.UserTaskService;
 
@@ -81,8 +86,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.permitAll().and().logout().logoutUrl("/logout").permitAll()
 				.deleteCookies("remember-me").logoutSuccessUrl("/").and()
 				.rememberMe();
-		//http.csrf().disable();
+		http.csrf().disable();
 		// remove this !!!!
+		
 		http.authorizeRequests().antMatchers("/").permitAll().and()
 				.authorizeRequests().antMatchers("/console/**").permitAll();
 
@@ -95,6 +101,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				new BCryptPasswordEncoder());
 	}
 
+	
+	@Bean
+    public FilterRegistrationBean facebookFilterRegistration(
+    		FacebookTokenAuthenticationFilter filter) {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.addUrlPatterns("/facebook/token");
+        registration.setFilter(filter);
+        registration.setOrder(-100);
+        return registration;
+    }
+	
 	@Bean
 	public AuthenticationSuccessHandler successHandler() {
 		SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler(
@@ -184,5 +201,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public Region region(final ConfigurationSettings settings) {
 		return Region.getRegion(Regions.fromName(settings
 				.getProperty("AWS_REGION")));
+	}
+	
+	
+	@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
+	public Facebook facebook(ConnectionRepository repo) {
+	Connection<Facebook> connection = repo.findPrimaryConnection(Facebook.class);
+		return connection != null ? connection.getApi() : null;
 	}
 }

@@ -1,5 +1,8 @@
 package co.becuz.domain;
 
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 
 public class CurrentUser extends
@@ -7,8 +10,12 @@ public class CurrentUser extends
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7606201012662695478L;
+	private static final long serialVersionUID = -7606201012662695479L;
 	private User user;
+
+	public CurrentUser(String email, String password, List<GrantedAuthority> authorities) {
+		super(email, password, authorities);
+	}
 
 	public CurrentUser(User user) {
 		super(user.getEmail(), user.getPasswordHash(), AuthorityUtils
