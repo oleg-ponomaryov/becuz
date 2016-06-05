@@ -13,7 +13,7 @@ About the project
 2. Initial login: demo@quantlance.com with password:demo
 3. Role based security implemented
 4. Two roles (ADMIN and USER) are implemented
-5. CRUD for Users and Images
+5. CRUD for Users and Photos
 6. CSRF based communication is enabled between UI forms and server
 
 Start Postgres

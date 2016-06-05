@@ -1,9 +1,7 @@
 package co.becuz.filters;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.FilterChain;
@@ -50,7 +48,7 @@ public class FacebookTokenAuthenticationFilter extends OncePerRequestFilter {
 			HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		
-		//try {
+		try {
 			String xAuthtoken = request.getHeader("X-FB-Authorization");
 
 			AccessGrant accessGrant = new AccessGrant(xAuthtoken);
@@ -86,7 +84,7 @@ public class FacebookTokenAuthenticationFilter extends OncePerRequestFilter {
 					user.setPasswordHash(UUID.randomUUID().toString());
 				}
 				user.setEmail(userProfile.getEmail());
-				user.setImageUrl(connection.getImageUrl());
+				user.setPhotoUrl(connection.getImageUrl());
 				user = this.userRepository.save(user);
 			}
 			
@@ -100,13 +98,12 @@ public class FacebookTokenAuthenticationFilter extends OncePerRequestFilter {
 					.setAuthentication(authentication);
 
 			LOGGER.info("Assigned facebook user:"+userDetails.toString());
-		//} catch (Exception e) {
-		//	SecurityContextHolder.clearContext();
-		//	throw new SecurityException();
-		//}
+		} catch (Exception e) {
+			SecurityContextHolder.clearContext();
+			throw new SecurityException();
+		}
 		Cookie c = new Cookie("Success", "true");	
 		response.addCookie(c);
-		//.addHeader("Success", "true");  //.setHeader("Success", "true");	
 		filterChain.doFilter(request, response);
 	}
 }

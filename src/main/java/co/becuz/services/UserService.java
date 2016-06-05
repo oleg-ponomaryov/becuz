@@ -19,4 +19,8 @@ public interface UserService {
 
 	void delete(String id);
 
+	User save(User user);
+
+	User update(User user);
+
 }

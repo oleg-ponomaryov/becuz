@@ -13,6 +13,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -119,5 +120,21 @@ public class UserController {
     	}
     	userService.delete(id);
         return "users";
+    }
+    
+    /*** Pure RESR API ***/
+    @RequestMapping(value = "/users",method=RequestMethod.POST)
+    public User create(@RequestBody User user) {
+      return userService.save(user);
+    }
+    
+    @RequestMapping(method=RequestMethod.DELETE, value="/users/{id}")
+    public void delete(@PathVariable String id) {
+    	userService.delete(id);
+    }
+    
+    @RequestMapping(method=RequestMethod.PUT, value="/users/{id}")
+    public User update(@PathVariable String id, @RequestBody User user) {
+      return userService.update(user);
     }
 }

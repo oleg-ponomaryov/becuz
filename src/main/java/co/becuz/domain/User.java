@@ -37,8 +37,8 @@ public class User implements Serializable {
 	@Column(name = "username")
 	private String username;
 
-	@Column(name = "imageurl", length = 500)
-	private String imageUrl;
+	@Column(name = "photourl", length = 500)
+	private String photoUrl;
 
 	@Column(name = "created")
 	private Date created;
@@ -46,12 +46,12 @@ public class User implements Serializable {
 	@Column(name = "updated")
 	private Date updated;
 
-	public String getImageUrl() {
-		return imageUrl;
+	public String getPhotoUrl() {
+		return photoUrl;
 	}
 
-	public void setImageUrl(String url) {
-		this.imageUrl = url;
+	public void setPhotoUrl(String url) {
+		this.photoUrl = url;
 	}
 
 	public String getUsername() {

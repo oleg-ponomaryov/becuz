@@ -59,7 +59,7 @@ public class UserTaskServiceImpl implements UserTaskService {
 				user.setPasswordHash(UUID.randomUUID().toString());
 			}
 			user.setEmail(dto.getEmail());
-			user.setImageUrl(dto.getImageURL());
+			user.setPhotoUrl(dto.getImageURL());
 			user = this.userRepository.save(user);
 		}
 

@@ -65,5 +65,38 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(String id) {
         userRepository.delete(id);
-    }    
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+    
+    @Override
+    public User update(User user) {
+    	User us = getUserById(user.getId());
+    	if (us == null) {
+    		throw new NoSuchElementException(String.format("User=%s not found", user.getId()));
+    	}
+
+    	if (user.getPhotoUrl() != null)
+    		us.setPhotoUrl(user.getPhotoUrl());
+    	
+    	if (user.getRole()!=null)
+    		us.setRole(user.getRole());
+    		
+    	if (user.getSigninprovider()!=null)
+    		us.setSigninprovider(user.getSigninprovider());
+    		
+    	if (user.getUsername()!=null)
+    		us.setUsername(user.getUsername());
+    	
+    	if (user.getEmail()!=null)
+    		us.setEmail(user.getEmail());
+        
+    	if (user.getPasswordHash()!=null)
+    		us.setPasswordHash(new BCryptPasswordEncoder().encode(user.getPasswordHash()));
+    	
+        return userRepository.save(us);
+    }
 }
