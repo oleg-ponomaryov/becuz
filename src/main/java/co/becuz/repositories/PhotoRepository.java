@@ -8,6 +8,6 @@ import co.becuz.domain.Photo;
 import co.becuz.domain.User;
 
 public interface PhotoRepository extends JpaRepository<Photo, String> {
-    Collection<Photo> findByOwner(User user);
+    Collection<Photo> findAllByOwner(User user);
     Photo findByMd5Digest(String digest);
 }

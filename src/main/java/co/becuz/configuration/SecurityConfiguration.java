@@ -73,6 +73,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests().antMatchers("/").permitAll()
 				.antMatchers("/startup/photos/**").permitAll()
+				.antMatchers("/time/**").permitAll()
 				.antMatchers("/css/**").permitAll()
 				.antMatchers("/login/**").permitAll()
 				.antMatchers("/imgs/**")
@@ -80,6 +81,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/users/**").hasAuthority("ADMIN")
 				.antMatchers("/photo/**").hasAnyAuthority("ADMIN", "USER")
 				.antMatchers("/photos/**").hasAnyAuthority("ADMIN", "USER")
+				.antMatchers("/frames/all").permitAll()
+				.antMatchers("/frames/**").hasAnyAuthority("ADMIN", "USER")
+				.antMatchers("/collections/**").hasAnyAuthority("ADMIN", "USER")
 				.anyRequest().fullyAuthenticated().and().formLogin()
 				.loginPage("/login").successHandler(successHandler())
 				.failureUrl("/login?error").usernameParameter("email")

@@ -58,7 +58,7 @@ public class PhotoServiceImpl implements PhotoService {
 
 	@Override
 	public Iterable<Photo> listAllPhotosForUser(String Id) {
-        return photoRepository.findByOwner(userRepository.getOne(Id));
+        return photoRepository.findAllByOwner(userRepository.getOne(Id));
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class PhotoServiceImpl implements PhotoService {
 		    }
 		
 		photo.setOwner(userService.getUserById(userMetadata.get("owner")));
-		photo.setTitle(userMetadata.get("title"));
+		photo.setCaption(userMetadata.get("title"));
 		//photo.setCreatedDate(new SimpleDateFormat("MM/dd/yyyy")
 		//		.parse(userMetadata.get("createddate")));
 		photo.setOriginalKey(photoKey);

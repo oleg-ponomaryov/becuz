@@ -5,8 +5,12 @@ import java.util.Date;
 
 import javax.persistence.*;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import org.hibernate.annotations.GenericGenerator;
 
+import co.becuz.domain.enums.Role;
 import co.becuz.social.SocialMediaTypes;
 
 @Entity
@@ -17,106 +21,52 @@ public class User implements Serializable {
 	@Id
 	@GeneratedValue(generator = "uuid")
 	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	@Getter
 	@Column(name = "id", nullable = false, updatable = false)
 	private String id;
 
 	@Column(name = "email", nullable = false, unique = true)
+	@Getter
+	@Setter
 	private String email;
 
 	@Column(name = "password_hash", nullable = false)
+	@Getter
+	@Setter
 	private String passwordHash;
 
 	@Column(name = "role", nullable = false)
 	@Enumerated(EnumType.STRING)
+	@Getter
+	@Setter
 	private Role role;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "sign_in_provider", length = 20)
+	@Getter
+	@Setter
 	private SocialMediaTypes signinprovider;
 
 	@Column(name = "username")
+	@Getter
+	@Setter
 	private String username;
 
 	@Column(name = "photourl", length = 500)
+	@Getter
+	@Setter
 	private String photoUrl;
 
 	@Column(name = "created")
+	@Getter
+	@Setter
 	private Date created;
 
 	@Column(name = "updated")
+	@Getter
+	@Setter
 	private Date updated;
 
-	public String getPhotoUrl() {
-		return photoUrl;
-	}
-
-	public void setPhotoUrl(String url) {
-		this.photoUrl = url;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String name) {
-		this.username = name;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getPasswordHash() {
-		return passwordHash;
-	}
-
-	public void setPasswordHash(String passwordHash) {
-		this.passwordHash = passwordHash;
-	}
-
-	public Role getRole() {
-		return role;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
-	public SocialMediaTypes getSigninprovider() {
-		return signinprovider;
-	}
-
-	public void setSigninprovider(SocialMediaTypes type) {
-		this.signinprovider = type;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public Date getCreated() {
-		return created;
-	}
-
-	public void setCreated(Date created) {
-		this.created = created;
-	}
-
-	public Date getUpdated() {
-		return updated;
-	}
-
-	public void setUpdated(Date updated) {
-		this.updated = updated;
-	}
 
 	@PrePersist
 	public void onSave() {

@@ -12,9 +12,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.stereotype.Service;
 
-import co.becuz.domain.CurrentUser;
-import co.becuz.domain.Role;
 import co.becuz.domain.User;
+import co.becuz.domain.enums.Role;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.repositories.UserRepository;
 import co.becuz.social.SocialMediaTypes;
 import co.becuz.social.dto.SocialDTO;

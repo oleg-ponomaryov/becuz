@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import co.becuz.domain.Role;
+import co.becuz.domain.enums.Role;
 
 public class UserCreateForm {
 

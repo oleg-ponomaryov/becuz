@@ -3,7 +3,7 @@ package co.becuz.util;
 import java.util.UUID;
 
 import co.becuz.configuration.ConfigurationSettings;
-import co.becuz.domain.CurrentUser;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.services.CommonService;
 
 import com.amazonaws.auth.AWSCredentialsProvider;

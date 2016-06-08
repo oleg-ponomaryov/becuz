@@ -25,9 +25,9 @@ import org.springframework.social.oauth2.AccessGrant;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import co.becuz.domain.CurrentUser;
-import co.becuz.domain.Role;
 import co.becuz.domain.User;
+import co.becuz.domain.enums.Role;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.repositories.UserRepository;
 import co.becuz.social.SocialMediaTypes;
 

@@ -13,6 +13,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,9 +21,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import co.becuz.configuration.ConfigurationSettings;
-import co.becuz.domain.CurrentUser;
+import co.becuz.domain.Collection;
 import co.becuz.domain.Photo;
-import co.becuz.domain.Role;
+import co.becuz.domain.enums.Role;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.services.CommonService;
@@ -86,7 +88,6 @@ public class PhotoController {
 	}
 
 	@RequestMapping(value = "/photo/add", method = RequestMethod.GET)
-	//@ResponseBody PhotoUploadFormSigner
 	public String  imageAdd(ModelMap model, HttpServletRequest request,
 			@ModelAttribute CurrentUser currentUser) {
 		// Photo redirect URL
@@ -102,9 +103,9 @@ public class PhotoController {
 		model.addAttribute("formSigner", formSigner);
 		model.addAttribute("templateName", "photo_upload");
 		return "photo_upload";
-		//return formSigner;
 	}
 
+/*
 	@RequestMapping(value = "/photo/upload", method = RequestMethod.GET)
 	public @ResponseBody PhotoUploadFormSigner imageUpload(HttpServletRequest request,
 			@ModelAttribute CurrentUser currentUser) {
@@ -113,6 +114,24 @@ public class PhotoController {
 				+ request.getServerName() + ":" + request.getServerPort()
 				+ request.getContextPath() + "/photo/ingest";
 		// Prepare S3 form upload
+		PhotoUploadFormSigner formSigner = new PhotoUploadFormSigner(
+				config.getProperty("S3_UPLOAD_BUCKET"),
+				config.getProperty("S3_UPLOAD_PREFIX"), currentUser, config,
+				redirectUrl, commonService);
+		
+		return formSigner;
+	}
+*/
+
+	@RequestMapping(value = "/photo/upload/{collectionId}", method = RequestMethod.POST)
+	public @ResponseBody PhotoUploadFormSigner imageUpload(HttpServletRequest request,
+			@ModelAttribute CurrentUser currentUser, @PathVariable String collectionId, @RequestBody Collection collection) {
+		// Photo redirect URL
+		String redirectUrl = request.getScheme() + "://"
+				+ request.getServerName() + ":" + request.getServerPort()
+				+ request.getContextPath() + "/photo/ingest";
+		// Prepare S3 form upload
+
 		PhotoUploadFormSigner formSigner = new PhotoUploadFormSigner(
 				config.getProperty("S3_UPLOAD_BUCKET"),
 				config.getProperty("S3_UPLOAD_PREFIX"), currentUser, config,
