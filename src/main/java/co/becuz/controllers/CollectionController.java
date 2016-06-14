@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import co.becuz.domain.Collection;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.services.CollectionService;
 
 @Controller
@@ -27,9 +29,9 @@ public class CollectionController {
         this.collectionService = collectionService;
     }
     
-    @RequestMapping(value = "/collections/user/{id}", method=RequestMethod.GET)
-    public @ResponseBody java.util.Collection<Collection> getAllCollectionsByUser(@PathVariable String id) {
-        return collectionService.getAllCollectionsByUser(id);
+    @RequestMapping(value = "/collections", method=RequestMethod.GET)
+    public @ResponseBody java.util.Collection<Collection> getAllCollectionsByUser(@ModelAttribute CurrentUser currentUser) {
+        return collectionService.getAllCollectionsByUserId(currentUser.getId());
     }
     
     @RequestMapping(value = "/collections",method=RequestMethod.POST)

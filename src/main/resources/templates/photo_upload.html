@@ -63,10 +63,12 @@
 				<div>
 					<label for="password">Photo</label>
 					<div class="input-group">
-						<!--  <input type="file" name="file" class="form-control"></input> -->
+						<!--  <input type="file" name="file" class="form-control"></input>
+						document.getElementById('key').value = document.getElementById('key').value.replace(/(.*)\/.*(\.*$)/i, '$1/'+this.value)"
+						 -->
 						<input type="file" name="file" class="form-control"
 					           onchange="document.getElementById('x-amz-meta-uuid').value = this.value; 
-					           document.getElementById('key').value = document.getElementById('key').value.replace(/(.*)\/.*(\.*$)/i, '$1/'+this.value)"
+					           document.getElementById('key').value = document.getElementById('key').value+'/'+this.value)"
 					     />
 						
 						<span class="input-group-addon">

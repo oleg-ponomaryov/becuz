@@ -26,12 +26,12 @@ public class CollectionServiceImpl implements CollectionService {
     }
 
     @Override
-    public java.util.Collection<Collection> getAllCollectionsByUser(String user_id) {
+    public java.util.Collection<Collection> getAllCollectionsByUserId(String user_id) {
     	User user = userRepository.findOne(user_id);
     	if (user == null) {
     		throw new NoSuchElementException(String.format("User=%s not found", user_id));
     	}
-        return collectionRepository.findAllByUser(user);
+        return collectionRepository.findAllByUserId(user.getId());
     }
     
     @Override

@@ -9,6 +9,8 @@ import co.becuz.domain.enums.FrameStatus;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -65,7 +67,10 @@ public class Frame implements Serializable {
 	@Getter
 	@Setter
 	private Date updated;
-		
+
+	@OneToMany(mappedBy = "frame", cascade = CascadeType.ALL)
+	private Set<Collection> colections = new HashSet<Collection>();
+	
 		@PrePersist
 		public void onSave() {
 			if (this.created==null) {

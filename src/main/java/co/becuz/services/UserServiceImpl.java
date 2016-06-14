@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import co.becuz.domain.User;
 import co.becuz.forms.UserCreateForm;
+import co.becuz.repositories.PhotoRepository;
 import co.becuz.repositories.UserRepository;
 
 @Service
@@ -19,6 +21,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PhotoRepository photoRepository;
+    
     @Override
     public User getUserById(String id) {
         return userRepository.findOne(id);
@@ -63,7 +68,9 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
+    @Transactional
     public void delete(String id) {
+    	//photoRepository.deleteInBatch(photoRepository.findAllByOwner(userRepository.findOne(id)));
         userRepository.delete(id);
     }
 

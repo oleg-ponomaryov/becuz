@@ -10,6 +10,7 @@
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/currentuser/CurrentUserServiceImpl.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/social/dto/SocialDTO.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/dto/PhotoDTO.java
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/CollectionPhotosServiceImpl.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/controllers/CurrentUserControllerAdvice.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/CommonService.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/controllers/LoginController.java
@@ -21,6 +22,7 @@
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/social/SocialUserDetails.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/util/S3FormSigner.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/social/dto/FacebookDTO.java
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/CollectionPhotosService.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/util/PhotoUploadFormSigner.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/configuration/ConfigurationProvider.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/domain/Photo.java
@@ -29,6 +31,7 @@
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/repositories/UserRepository.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/domain/User.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/domain/Collection.java
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/dto/response/PhotoSaveResponse.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/CollectionServiceImpl.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/repositories/PhotoRepository.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/currentuser/CurrentUserDetailsService.java
@@ -54,6 +57,7 @@
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/controllers/PhotoController.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/FrameServiceImpl.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/social/interceptor/FacebookConnectInterceptor.java
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/dto/PhotoUploadRequestDTO.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/validators/UserCreateFormValidator.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/domain/Frame.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/domain/enums/DisplayType.java

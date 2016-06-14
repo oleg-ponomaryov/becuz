@@ -47,15 +47,14 @@ public class UserControllerTest {
 
     @Value("${local.server.port}")
     int port;
-
+    private static boolean setUpIsDone = false;
+    
     @Before
     public void setUp() {
-        demo = new User();
-        demo.setRole(Role.ADMIN);
-        demo.setUsername("demo");
-        demo.setPasswordHash("$2a$10$ebyC4Z5WtCXXc.HGDc1Yoe6CLFzcntFmfse6/pTj7CeDY5I05w16C");
-        demo.setEmail("demo@quantlance.com");
-        demo.setPhotoUrl("http://");
+    	if (setUpIsDone) {
+    		return;
+    	}
+        demo = repository.findOne("abc-edcv");
     	
         john = new User();
         john.setRole(Role.ADMIN);
@@ -78,11 +77,12 @@ public class UserControllerTest {
         mary.setEmail("mary@mary.com");
         mary.setPhotoUrl("http://");
 
-        repository.deleteAll();
-        repository.save(Arrays.asList(john, oleg, mary, demo));
+        //repository.deleteAll();
+        repository.save(Arrays.asList(john, oleg, mary));
 
         RestAssured.port = port;
         RestAssured.authentication = RestAssured.form("demo@quantlance.com", "demo", new FormAuthConfig("/login", "email", "password"));
+        setUpIsDone = true;
     }
 
     @Test
@@ -118,7 +118,7 @@ public class UserControllerTest {
         resp
         .then()
         .statusCode(HttpStatus.SC_OK).
-        and().body("email", hasItems("demo@quantlance.com", "john@john.com","mary@mary.com","oleg@oleg.com"));
+        and().body("email", hasItems("demo@quantlance.com", "greatjohn@john.com","mary@mary.com","oleg@oleg.com"));
         return;
     }
 

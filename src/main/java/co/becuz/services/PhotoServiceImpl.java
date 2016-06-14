@@ -11,9 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import co.becuz.configuration.ConfigurationSettings;
+import co.becuz.domain.Collection;
+import co.becuz.domain.CollectionPhotos;
 import co.becuz.domain.Photo;
+import co.becuz.domain.User;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
+import co.becuz.dto.response.PhotoSaveResponse;
 import co.becuz.dto.response.StaticImage;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.repositories.UserRepository;
@@ -47,17 +54,23 @@ public class PhotoServiceImpl implements PhotoService {
 	
 	@Autowired
 	private CommonService commonService;
+
+	@Autowired
+	private CollectionService collectionService;
+
+	@Autowired
+	private CollectionPhotosService collectionPhotosService;
 	
 	@Autowired
 	private ConfigurationSettings config;
 	
     @Override
-    public Iterable<Photo> listAllPhotos() {
+    public List<Photo> listAllPhotos() {
         return photoRepository.findAll();
     }
 
 	@Override
-	public Iterable<Photo> listAllPhotosForUser(String Id) {
+	public java.util.Collection<Photo> listAllPhotosForUser(String Id) {
         return photoRepository.findAllByOwner(userRepository.getOne(Id));
 	}
 
@@ -96,15 +109,21 @@ public class PhotoServiceImpl implements PhotoService {
 	
     
 	@Override
-	public Photo save(String bucket, String photoKey) throws ParseException {
-
+	@Transactional
+	public PhotoSaveResponse save(String bucket, String photoKey, String collectionId, CurrentUser user) throws ParseException {
 		LOG.debug("Saving for bucket:{} and key:{}:",bucket, photoKey);
+		PhotoSaveResponse resp = new PhotoSaveResponse();
+		
+		Collection collection = collectionService.getCollectionById(collectionId);
+		if (collection==null) {
+			resp.setStatus("ERROR");
+			resp.setMessage(String.format("Collection with id %s not found",collectionId));
+		}
+		
 		GetObjectMetadataRequest metadataReq = new GetObjectMetadataRequest(
 				bucket, photoKey);
 		ObjectMetadata metadata = s3Client.getObjectMetadata(metadataReq);
-		
 		Map<String, String> userMetadata = metadata.getUserMetadata();
-		
 		Photo photo  = photoRepository.findByMd5Digest(metadata.getETag());
 		
 		if (photo == null) {
@@ -112,24 +131,39 @@ public class PhotoServiceImpl implements PhotoService {
 		}	
 
 		photo.setDescription(userMetadata.get("description"));
-
 		Iterator it = userMetadata.entrySet().iterator();
 		    while (it.hasNext()) {
 		        Map.Entry pair = (Map.Entry)it.next();
-		        System.out.println(pair.getKey() + " = " + pair.getValue());
+		        LOG.info(pair.getKey() + " = " + pair.getValue());
 		    }
 		
-		photo.setOwner(userService.getUserById(userMetadata.get("owner")));
+		User us = userService.getUserById(user.getUser().getId());
+		photo.setOwner(us);
 		photo.setCaption(userMetadata.get("title"));
-		//photo.setCreatedDate(new SimpleDateFormat("MM/dd/yyyy")
-		//		.parse(userMetadata.get("createddate")));
 		photo.setOriginalKey(photoKey);
 		photo.setBucket(userMetadata.get("bucket"));
 		photo.setMd5Digest(metadata.getETag());
 		photo.setUploadedDate(new Date());
 
-		photoRepository.save(photo);
-		return photo;
+		Photo p = photoRepository.save(photo);
+		
+		CollectionPhotos col = collectionPhotosService.getCollectionPhotosByPhotoAndCollection(photo, collection);
+		
+		if ( col != null) {
+			resp.setStatus("WARNING");
+			resp.setMessage(String.format("Reference already exists for Collection %s and Photo %s",collection.getId(), photo.getId()));
+		}
+		else {
+			col = new CollectionPhotos();
+			col.setCollection(collection);
+			col.setPhoto(photo);
+			collectionPhotosService.save(col);
+			resp.setStatus("SUCCESS");
+		}
+
+		resp.setCollectionPhotos(col);
+		
+		return resp;
 	}
 
 	@Override
@@ -170,5 +204,10 @@ public class PhotoServiceImpl implements PhotoService {
 			}
 		}
 		return newPhotos;
+	}
+
+	@Override
+	public Photo save(Photo photo) {
+	       return photoRepository.save(photo);
 	}
 }

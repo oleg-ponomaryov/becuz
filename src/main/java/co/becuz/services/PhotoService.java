@@ -1,18 +1,24 @@
 package co.becuz.services;
 
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.List;
 
 import co.becuz.domain.Photo;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
+import co.becuz.dto.response.PhotoSaveResponse;
 import co.becuz.dto.response.StaticImage;
 
 public interface PhotoService {
 
-	public Photo save(String bucket, String photoKey) throws ParseException;
-	public PhotoDTO generateExpiringUrl(Photo photo, long expirationInMillis);
-	public List<PhotoDTO> generateExpiringUrls(List<Photo> photos, long expirationInMillis);
-	Iterable<Photo> listAllPhotos();
-	Iterable<Photo> listAllPhotosForUser(String Id);
+	PhotoDTO generateExpiringUrl(Photo photo, long expirationInMillis);
+	List<PhotoDTO> generateExpiringUrls(List<Photo> photos, long expirationInMillis);
+	Collection<Photo> listAllPhotos();
+	Collection<Photo> listAllPhotosForUser(String Id);
 	List<StaticImage> getStaticImages(String bucket, String prefix);
+	PhotoSaveResponse save(String bucket, String photoKey, String collectionId,
+			CurrentUser user) throws ParseException;
+	
+	Photo save(Photo photo);
 }

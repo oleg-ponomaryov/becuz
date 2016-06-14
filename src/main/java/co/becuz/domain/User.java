@@ -1,7 +1,12 @@
 package co.becuz.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -9,15 +14,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import co.becuz.domain.enums.Role;
+import co.becuz.services.PhotoService;
 import co.becuz.social.SocialMediaTypes;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+	indexes = { @Index(name = "user_email_idx", columnList = "email"), @Index(name = "user_name_provider_idx",
+	columnList = "username,sign_in_provider")})
 public class User implements Serializable {
 	private static final long serialVersionUID = -4839837450069014606L;
 
+	//@Autowired
+	//private PhotoService photoService;
+	
 	@Id
 	@GeneratedValue(generator = "uuid")
 	@GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -67,19 +79,24 @@ public class User implements Serializable {
 	@Setter
 	private Date updated;
 
+	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+	private Set<Photo> photos = new HashSet<Photo>();
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<Collection> colections = new HashSet<Collection>();
+	
 	@PrePersist
 	public void onSave() {
 		if (this.created == null) {
 			this.created = new Date();
 		}
 	}
-
+	
 	@PreUpdate
 	public void onUpdate() {
 		this.updated = new Date();
 	}
-
+	
 	@Override
 	public String toString() {
 		return "User{" + "id=" + getId() + ", email='"

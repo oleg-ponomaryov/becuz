@@ -3,6 +3,7 @@ package co.becuz.domain;
 import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,7 +11,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "collections")
+@Table(name = "collectionphotos", indexes = { @Index(name = "photo_collections_idx", columnList = "photo_id,collection_id"), @Index(name = "photo_collections_collection_idx", columnList = "collection_id")})
+
 public class CollectionPhotos implements Serializable {
 
 	private static final long serialVersionUID = 5768299756910219095L;
@@ -21,16 +23,18 @@ public class CollectionPhotos implements Serializable {
     @Column(name = "id", nullable = false, updatable = false)
 	@Getter
 	private String id;
-	
-    @Column(name = "collection_id", nullable = false)
-	@Getter
-	@Setter
-    private Collection collection;
     
-    @Column(name = "photo_id", nullable = false)
+	@ManyToOne
+    @JoinColumn(name = "collection_id")	
 	@Getter
 	@Setter
-    private Photo photo;
+	private Collection collection;
+
+	@ManyToOne
+    @JoinColumn(name = "photo_id")	
+	@Getter
+	@Setter
+	private Photo photo;
 
     @Column(name = "created", nullable = false, updatable = false)
 	@Getter

@@ -43,8 +43,8 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label">Role:</label>
 				<select name="role" id="role" required="required">
-					<option value="USER" th:selected="${form.role == T(co.becuz.domain.Role).USER}" >USER</option>
-					<option value="ADMIN" th:selected="${form.role == T(co.becuz.domain.Role).ADMIN}" >ADMIN</option>
+					<option value="USER" th:selected="${form.role == T(co.becuz.domain.enums.Role).USER}" >USER</option>
+					<option value="ADMIN" th:selected="${form.role == T(co.becuz.domain.enums.Role).ADMIN}" >ADMIN</option>
 				</select>
 			</div>
 

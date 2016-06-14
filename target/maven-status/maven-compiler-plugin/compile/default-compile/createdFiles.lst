@@ -5,6 +5,7 @@ co/becuz/domain/User.class
 co/becuz/repositories/CollectionRepository.class
 co/becuz/social/SocialMediaTypes.class
 co/becuz/configuration/SecurityConfiguration.class
+co/becuz/dto/response/PhotoSaveResponse.class
 co/becuz/services/PhotoServiceImpl.class
 co/becuz/controllers/LoginController.class
 co/becuz/controllers/PhotoController.class
@@ -39,11 +40,13 @@ co/becuz/configuration/ClassResourceConfigurationProvider.class
 co/becuz/controllers/CurrentUserControllerAdvice.class
 co/becuz/domain/Frame.class
 co/becuz/validators/UserCreateFormValidator.class
+co/becuz/services/CollectionPhotosService.class
 co/becuz/services/CommonService.class
 co/becuz/domain/Photo.class
 co/becuz/repositories/CollectionPhotosRepository.class
 co/becuz/SpringBootWebApplication.class
 co/becuz/dto/response/StaticImage.class
+co/becuz/dto/PhotoUploadRequestDTO.class
 co/becuz/domain/nottables/CurrentUser.class
 co/becuz/social/SocialUserDetails.class
 co/becuz/controllers/IndexController.class
@@ -56,5 +59,6 @@ co/becuz/filters/FacebookUserDetails.class
 co/becuz/util/PhotoUploadFormSigner.class
 co/becuz/controllers/StaticImageController.class
 co/becuz/controllers/UserController.class
+co/becuz/services/CollectionPhotosServiceImpl.class
 co/becuz/domain/enums/FrameOwner.class
 co/becuz/domain/enums/FrameStatus.class

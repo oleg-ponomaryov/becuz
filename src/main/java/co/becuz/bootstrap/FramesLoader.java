@@ -19,7 +19,7 @@ public class FramesLoader implements ApplicationListener<ContextRefreshedEvent> 
 			.getLogger(FramesLoader.class);
     
     @Autowired
-    public void setProductRepository(FrameRepository frameRepository) {
+    public void setFrameRepository(FrameRepository frameRepository) {
         this.frameRepository = frameRepository;
     }
  

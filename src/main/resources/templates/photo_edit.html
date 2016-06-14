@@ -14,7 +14,7 @@
 
 		<div th:object="${dto}">
 			<form role="form" method="post" th:object="${photo}"
-				th:action="@{/photo/} + ${photo.id}" enctype="multipart/form-data">
+				th:action="@{/photo/insert/} + ${photo.id}" enctype="multipart/form-data">
 				<input type="hidden" th:field="*{id}" />
 				<input type="hidden" th:field="*{owner}" />
 				<input type="hidden" th:field="*{bucket}" />

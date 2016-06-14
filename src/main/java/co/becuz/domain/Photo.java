@@ -6,12 +6,15 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "photos")
+@Table(name = "photos", indexes = { @Index(name = "owner_idx", columnList = "owner_id"), @Index(name = "md5_digest_idx", columnList = "md5_digest")})
+
 public class Photo implements Serializable {
 	private static final long serialVersionUID = -2762093398070254170L;
 
@@ -21,12 +24,13 @@ public class Photo implements Serializable {
     @Column(name = "id", nullable = false, updatable = false)
 	@Getter
 	private String id;
-	
-	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+
+	@ManyToOne
+    @JoinColumn(name = "owner_id")	
 	@Getter
 	@Setter
 	private User owner;
-    
+	
     @Column(name = "bucket", nullable = false)
 	@Getter
 	@Setter
@@ -71,8 +75,11 @@ public class Photo implements Serializable {
 	@Getter
 	@Setter
 	private Date updated;
-		
-		@PrePersist
+	
+	@OneToMany(mappedBy = "photo", cascade = CascadeType.ALL)
+	private Set<CollectionPhotos> colectionPhotos = new HashSet<CollectionPhotos>();
+	
+	@PrePersist
 		public void onSave() {
 			if (this.created==null) {
 				this.created = new Date();

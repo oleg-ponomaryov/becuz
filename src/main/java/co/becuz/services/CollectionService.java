@@ -6,7 +6,7 @@ public interface CollectionService {
 
 	Collection getCollectionById(String id);
 
-    java.util.Collection<Collection> getAllCollectionsByUser(String user_id);
+    java.util.Collection<Collection> getAllCollectionsByUserId(String user_id);
 
 	void delete(String id);
 

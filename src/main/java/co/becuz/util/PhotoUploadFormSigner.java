@@ -38,7 +38,7 @@ public class PhotoUploadFormSigner extends S3FormSigner {
 				credsProvider, successActionRedirect);
 		String[] policyAndSig = super.signRequest(credsProvider, policy);
 		// Create object key
-		generatePhotoObjectKey(this.uuid);
+		generatePhotoObjectKey();
 		// Create policy
 		this.encodedPolicy = policyAndSig[0];
 		this.signature = policyAndSig[1];
@@ -48,9 +48,8 @@ public class PhotoUploadFormSigner extends S3FormSigner {
 	/**
 	 * Generate a unique object key for this upload
 	 */
-	private void generatePhotoObjectKey(String uuid) {
-		this.objectKey = this.keyPrefix + "/original/" + user.getId() + "/"
-				+ uuid;
+	private void generatePhotoObjectKey() {
+		this.objectKey = this.keyPrefix + "/original/" + user.getId();
 	}
 
 	public AWSCredentialsProvider getCredsProvider() {
