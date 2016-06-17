@@ -57,7 +57,22 @@ public class Frame implements Serializable {
 	@Getter
 	@Setter
     private String description;
+    
+    @Column(name = "child_id")
+	@Getter
+	@Setter
+    private String childId;
 
+    @Column(name = "photo_width")
+	@Getter
+	@Setter
+    private int photoWidth;
+
+    @Column(name = "photo_height")
+	@Getter
+	@Setter
+    private int photoHeight;
+    
     @Column(name = "created", nullable = false, updatable = false)
 	@Getter
 	@Setter

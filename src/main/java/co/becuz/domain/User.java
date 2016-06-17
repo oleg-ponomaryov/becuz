@@ -64,6 +64,21 @@ public class User implements Serializable {
 	@Setter
 	private String username;
 
+	@Column(name = "firstname")
+	@Getter
+	@Setter
+	private String firstname;
+
+	@Column(name = "lastname")
+	@Getter
+	@Setter
+	private String lastname;
+	
+	@Column(name = "dob")
+	@Getter
+	@Setter
+	private Date dob;
+	
 	@Column(name = "photourl", length = 500)
 	@Getter
 	@Setter

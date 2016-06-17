@@ -36,6 +36,7 @@ import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.http.HttpMethod;
 
 import co.becuz.filters.FacebookTokenAuthenticationFilter;
 import co.becuz.social.interceptor.FacebookConnectInterceptor;
@@ -80,10 +81,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.permitAll().antMatchers("/connect/**").permitAll()
 				.antMatchers("/users/**").hasAuthority("ADMIN")
 				.antMatchers("/photo/**").hasAnyAuthority("ADMIN", "USER")
-				//.antMatchers("/photo/**").permitAll()
 				.antMatchers("/photos/**").hasAnyAuthority("ADMIN", "USER")
 				.antMatchers("/frames/all").permitAll()
 				.antMatchers("/frames/**").hasAnyAuthority("ADMIN", "USER")
+				.antMatchers(HttpMethod.GET, "/collections/{id}").permitAll()
 				.antMatchers("/collections/**").hasAnyAuthority("ADMIN", "USER")
 				.anyRequest().fullyAuthenticated().and().formLogin()
 				.loginPage("/login").successHandler(successHandler())
