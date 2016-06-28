@@ -32,6 +32,12 @@ public class Frame implements Serializable {
 	@Getter
 	@Setter
     private String url;
+
+    @Column(name = "preview_url", nullable = true)
+	@Getter
+	@Setter
+    private String previewImgUrl;
+
     
     @Column(name = "display_type", nullable = true)
 	@Getter
