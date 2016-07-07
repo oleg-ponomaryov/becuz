@@ -10,11 +10,11 @@
 	<div class="container">
 		<!--/*/ <th:block th:include="fragments/header :: header"></th:block> /*/-->
 
-		<h2>Image Details</h2>
+		<h2>Photo Details</h2>
 
 		<div th:object="${dto}">
-			<form role="form" method="post" th:object="${image}"
-				th:action="@{/image/} + ${image.id}" enctype="multipart/form-data">
+			<form role="form" method="post" th:object="${photo}"
+				th:action="@{/photo/insert/} + ${photo.id}" enctype="multipart/form-data">
 				<input type="hidden" th:field="*{id}" />
 				<input type="hidden" th:field="*{owner}" />
 				<input type="hidden" th:field="*{bucket}" />
@@ -22,7 +22,7 @@
 				 <input type="hidden" th:field="*{thumbnailKey}" />
 				 <input type="hidden" th:field="*{uploadedDate}" />
 				<div id="legend">
-					<legend th:text="${image.title}">Edit Image</legend>
+					<legend th:text="${photo.title}">Edit Photo</legend>
 				</div>
 				<img th:src="${dto.expiringThumbnailUrl}" alt=""
 					class="img-rounded img-responsive"></img>
@@ -35,7 +35,7 @@
 					<label for="title">Title</label>
 					<div class="input-group">
 						<input type="text" class="form-control" id="title"
-							th:field="*{title}" placeholder="Image Title"></input> <span
+							th:field="*{title}" placeholder="Photo Title"></input> <span
 							class="input-group-addon"><span
 							class="glyphicon glyphicon-facetime-video"></span></span>
 					</div>

@@ -1,9 +1,12 @@
-package co.becuz.domain;
+package co.becuz.domain.nottables;
 
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+
+import co.becuz.domain.User;
+import co.becuz.domain.enums.Role;
 
 public class CurrentUser extends
 		org.springframework.security.core.userdetails.User {

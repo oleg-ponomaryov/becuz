@@ -3,7 +3,7 @@ package co.becuz.util;
 import java.util.UUID;
 
 import co.becuz.configuration.ConfigurationSettings;
-import co.becuz.domain.CurrentUser;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.services.CommonService;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -14,7 +14,7 @@ import com.amazonaws.auth.BasicSessionCredentials;
  * @author oleg.ponomaryov
  *
  */
-public class ImageUploadFormSigner extends S3FormSigner {
+public class PhotoUploadFormSigner extends S3FormSigner {
 	private String s3Bucket;
 	private String objectKey;
 	private String keyPrefix;
@@ -26,7 +26,7 @@ public class ImageUploadFormSigner extends S3FormSigner {
 	private AWSCredentialsProvider credsProvider;
 	private CommonService commonService;
 
-	public ImageUploadFormSigner(String s3Bucket, String keyPrefix, CurrentUser user,
+	public PhotoUploadFormSigner(String s3Bucket, String keyPrefix, CurrentUser user,
 			ConfigurationSettings config, String successActionRedirect, CommonService commonService) {
 		this.s3Bucket = s3Bucket;
 		this.keyPrefix = keyPrefix;
@@ -38,7 +38,7 @@ public class ImageUploadFormSigner extends S3FormSigner {
 				credsProvider, successActionRedirect);
 		String[] policyAndSig = super.signRequest(credsProvider, policy);
 		// Create object key
-		generateImageObjectKey(this.uuid);
+		generatePhotoObjectKey();
 		// Create policy
 		this.encodedPolicy = policyAndSig[0];
 		this.signature = policyAndSig[1];
@@ -48,9 +48,8 @@ public class ImageUploadFormSigner extends S3FormSigner {
 	/**
 	 * Generate a unique object key for this upload
 	 */
-	private void generateImageObjectKey(String uuid) {
-		this.objectKey = this.keyPrefix + "/original/" + user.getId() + "/"
-				+ uuid;
+	private void generatePhotoObjectKey() {
+		this.objectKey = this.keyPrefix + "/original/" + user.getId();
 	}
 
 	public AWSCredentialsProvider getCredsProvider() {

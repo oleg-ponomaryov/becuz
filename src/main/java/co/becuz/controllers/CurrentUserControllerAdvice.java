@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import co.becuz.domain.CurrentUser;
+import co.becuz.domain.nottables.CurrentUser;
 
 @ControllerAdvice
 public class CurrentUserControllerAdvice {

@@ -3,18 +3,18 @@ package co.becuz.dto;
 import java.io.Serializable;
 import java.net.URL;
 
-public class ImageDTO implements Serializable {
-	private String imageId;
+public class PhotoDTO implements Serializable {
+	private String photoId;
 	private URL expiringUrl;
     private URL expiringThumbnailUrl;
 	
 	private static final long serialVersionUID = -3600281937042078536L;
 
-	public String getImageId() {
-		return imageId;
+	public String getPhotoId() {
+		return photoId;
 	}
-	public void setInageId(String imageId) {
-		this.imageId = imageId;
+	public void setInageId(String photoId) {
+		this.photoId = photoId;
 	}
 	public URL getExpiringUrl() {
 		return expiringUrl;

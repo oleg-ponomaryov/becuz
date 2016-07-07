@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import co.becuz.domain.CurrentUser;
-import co.becuz.domain.Role;
+import co.becuz.domain.enums.Role;
+import co.becuz.domain.nottables.CurrentUser;
 
 @Service
 public class CurrentUserServiceImpl implements CurrentUserService {
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(CurrentUserDetailsService.class);
+			.getLogger(CurrentUserServiceImpl.class);
 
 	@Override
 	public boolean canAccessUser(CurrentUser currentUser, String userId) {

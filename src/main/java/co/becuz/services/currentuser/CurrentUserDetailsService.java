@@ -10,8 +10,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import co.becuz.domain.CurrentUser;
 import co.becuz.domain.User;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.services.UserService;
 
 @Service
@@ -28,7 +28,9 @@ public class CurrentUserDetailsService implements UserDetailsService {
 		LOGGER.debug("Authenticating user with email={}",
 				email.replaceFirst("@.*", "@***"));
 		Collection<User> users = userService.getUserByEmail(email);
-		if (users.size() == 0) {		
+		if (users.size() == 0) {
+			LOGGER.error("Could not find user with email={}",
+					email.replaceFirst("@.*", "@***"));
 			throw new UsernameNotFoundException(String.format(
 					"User with email=%s was not found", email)); 	
 		}

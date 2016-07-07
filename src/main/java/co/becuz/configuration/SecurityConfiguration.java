@@ -36,6 +36,7 @@ import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.http.HttpMethod;
 
 import co.becuz.filters.FacebookTokenAuthenticationFilter;
 import co.becuz.social.interceptor.FacebookConnectInterceptor;
@@ -72,14 +73,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests().antMatchers("/").permitAll()
-				.antMatchers("/startup/images/**").permitAll()
+				.antMatchers("/startup/photos/**").permitAll()
+				.antMatchers("/time/**").permitAll()
 				.antMatchers("/css/**").permitAll()
 				.antMatchers("/login/**").permitAll()
 				.antMatchers("/imgs/**")
 				.permitAll().antMatchers("/connect/**").permitAll()
 				.antMatchers("/users/**").hasAuthority("ADMIN")
-				.antMatchers("/image/**").hasAnyAuthority("ADMIN", "USER")
-				.antMatchers("/images/**").hasAnyAuthority("ADMIN", "USER")
+				.antMatchers("/photo/**").hasAnyAuthority("ADMIN", "USER")
+				.antMatchers("/photos/**").hasAnyAuthority("ADMIN", "USER")
+				.antMatchers("/frames/all").permitAll()
+				.antMatchers("/frames/**").hasAnyAuthority("ADMIN", "USER")
+				.antMatchers(HttpMethod.GET, "/collections/{id}").permitAll()
+				.antMatchers("/collections/**").hasAnyAuthority("ADMIN", "USER")
 				.anyRequest().fullyAuthenticated().and().formLogin()
 				.loginPage("/login").successHandler(successHandler())
 				.failureUrl("/login?error").usernameParameter("email")

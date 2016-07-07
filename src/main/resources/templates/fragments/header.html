@@ -32,13 +32,13 @@
 								</li>
 								<li><a href="#" th:href="@{|/user/${currentUser.id}|}">View myself</a></li>
 								
-								<div th:if="${currentUser.role == T(co.becuz.domain.Role).ADMIN}">
+								<div th:if="${currentUser.role == T(co.becuz.domain.enums.Role).ADMIN}">
 													<li><a href="#" th:href="@{/user/create}">Create a new User</a></li>
-													<li><a href="#" th:href="@{/users}">View all users</a></li>
+													<li><a href="#" th:href="@{/users/all}">View all users</a></li>
 								</div>
 								
-					            <li><a href="#" th:href="@{/images}">View all images</a></li>
-					            <li><a href="#" th:href="@{/image/upload}">Upload a new Image</a></li>
+					            <li><a href="#" th:href="@{/photos}">View all Photos</a></li>
+					            <li><a href="#" th:href="@{/photo/add}">Upload a new Photo</a></li>
 			             </div>
 			        </ul>
                 </div>
