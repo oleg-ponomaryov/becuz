@@ -2,15 +2,22 @@ package co.becuz.configuration;
 
 import java.io.IOException;
 
+import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,17 +30,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.social.connect.ConnectionRepository;
@@ -43,14 +47,6 @@ import org.springframework.social.connect.support.ConnectionFactoryRegistry;
 import org.springframework.social.connect.web.ConnectController;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.connect.FacebookConnectionFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
-import org.springframework.core.env.Environment;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.http.HttpMethod;
 
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.UserDTO;
@@ -59,14 +55,14 @@ import co.becuz.social.interceptor.FacebookConnectInterceptor;
 import co.becuz.social.service.UserTaskService;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -93,7 +89,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		
-		http.authorizeRequests().antMatchers("/").permitAll()
+		http.addFilterAfter(expiredSessionFilter(),
+				SessionManagementFilter.class)
+				.authorizeRequests().antMatchers("/").permitAll()
 				.antMatchers("/startup/photos/**").permitAll()
 				.antMatchers("/time/**").permitAll()
 				.antMatchers("/css/**").permitAll()
@@ -251,6 +249,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return connection != null ? connection.getApi() : null;
 	}
 
+	 private Filter expiredSessionFilter() {
+	        SessionManagementFilter smf = new SessionManagementFilter(new HttpSessionSecurityContextRepository());
+	        smf.setInvalidSessionStrategy((request, response) -> response.setStatus(440));               
+	        return smf;
+	    }
+	
 	class AuthenticationFailureHandlerImpl extends SimpleUrlAuthenticationFailureHandler {
 		 @Override
          public void onAuthenticationFailure(
