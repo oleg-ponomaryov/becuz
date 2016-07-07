@@ -1,23 +1,33 @@
 package co.becuz.domain;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.Getter;
 import lombok.Setter;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import co.becuz.domain.enums.Role;
-import co.becuz.services.PhotoService;
 import co.becuz.social.SocialMediaTypes;
 
 @Entity
@@ -27,9 +37,6 @@ import co.becuz.social.SocialMediaTypes;
 public class User implements Serializable {
 	private static final long serialVersionUID = -4839837450069014606L;
 
-	//@Autowired
-	//private PhotoService photoService;
-	
 	@Id
 	@GeneratedValue(generator = "uuid")
 	@GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -42,9 +49,14 @@ public class User implements Serializable {
 	@Setter
 	private String email;
 
+	@Transient
+	//@JsonIgnore
+	private String password;
+	
 	@Column(name = "password_hash", nullable = false)
 	@Getter
 	@Setter
+	@JsonIgnore
 	private String passwordHash;
 
 	@Column(name = "role", nullable = false)
@@ -94,6 +106,16 @@ public class User implements Serializable {
 	@Setter
 	private Date updated;
 
+	@JsonIgnore
+	public String getPassword() {
+		return password;
+	}
+
+	@JsonProperty
+	public void setPassword(String pass) {
+		this.password=pass;
+	}
+	
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
 	private Set<Photo> photos = new HashSet<Photo>();
 

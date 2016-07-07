@@ -8,14 +8,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import co.becuz.domain.nottables.CurrentUser;
 
 @Controller
 public class LoginController {
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String getLoginPage(Model model) {
-        return "login";
+    @RequestMapping(value = "/login/success", method = RequestMethod.GET)
+    public @ResponseBody String getLoginPage(Model model, @ModelAttribute CurrentUser currentUser) {
+        return "{bla-------------------------->>>}";
    }
 
     @RequestMapping(value="/logout", method = RequestMethod.GET)

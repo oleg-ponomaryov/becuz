@@ -87,16 +87,10 @@ public class UserControllerTest {
 
     @Test
     public void createUser() {
-    	User jane = new User();
-        jane.setRole(Role.USER);
-        jane.setUsername("jane");
-        jane.setPasswordHash("123");
-        jane.setEmail("jane@jane.com");
-        jane.setPhotoUrl("http://");
-
+        String j = "{\"email\":\"jane@jane.com\",\"role\":\"USER\",\"password\":\"123\",\"username\":\"jane\",\"photoUrl\":\"http://\"}";
         assertEquals(repository.findAllByEmail("jane@jane.com").size(),0);
 
-        Response resp = RestAssured.given().contentType("application/json\r\n").with().body(jane).when().post("/users");
+        Response resp = RestAssured.given().contentType("application/json\r\n").with().body(j).when().post("/users");
         resp.prettyPrint();
         
         resp

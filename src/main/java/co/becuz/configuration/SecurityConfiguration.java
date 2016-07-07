@@ -1,5 +1,10 @@
 package co.becuz.configuration;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +17,23 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.social.connect.ConnectionRepository;
@@ -31,6 +43,8 @@ import org.springframework.social.connect.support.ConnectionFactoryRegistry;
 import org.springframework.social.connect.web.ConnectController;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.connect.FacebookConnectionFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.core.env.Environment;
@@ -38,6 +52,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpMethod;
 
+import co.becuz.domain.nottables.CurrentUser;
+import co.becuz.dto.UserDTO;
 import co.becuz.filters.FacebookTokenAuthenticationFilter;
 import co.becuz.social.interceptor.FacebookConnectInterceptor;
 import co.becuz.social.service.UserTaskService;
@@ -51,12 +67,16 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
 @EnableWebMvcSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+	private Gson gson = new GsonBuilder().create();
 
 	@Autowired
 	private Environment environment;
@@ -72,6 +92,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		
 		http.authorizeRequests().antMatchers("/").permitAll()
 				.antMatchers("/startup/photos/**").permitAll()
 				.antMatchers("/time/**").permitAll()
@@ -86,9 +107,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/frames/**").hasAnyAuthority("ADMIN", "USER")
 				.antMatchers(HttpMethod.GET, "/collections/{id}").permitAll()
 				.antMatchers("/collections/**").hasAnyAuthority("ADMIN", "USER")
-				.anyRequest().fullyAuthenticated().and().formLogin()
-				.loginPage("/login").successHandler(successHandler())
-				.failureUrl("/login?error").usernameParameter("email")
+				.anyRequest().fullyAuthenticated()
+				.and().formLogin()
+				//.loginPage("/login")
+				.successHandler(successHandler())
+				.failureHandler(failureHandler())
+				.usernameParameter("email")
 				.permitAll().and().logout().logoutUrl("/logout").permitAll()
 				.deleteCookies("remember-me").logoutSuccessUrl("/").and()
 				.rememberMe();
@@ -118,15 +142,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return registration;
     }
 	
+	
+	
 	@Bean
 	public AuthenticationSuccessHandler successHandler() {
-		SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler(
-				"/");
+		AuthenticationSuccessHandlerImpl handler = new AuthenticationSuccessHandlerImpl(
+				);
 		handler.setAlwaysUseDefaultTargetUrl(false);
-		handler.setTargetUrlParameter("spring-security-redirect");
+		//handler.setTargetUrlParameter("spring-security-redirect");
 		return handler;
 	}
 
+	@Bean
+	public AuthenticationFailureHandler failureHandler() {
+		AuthenticationFailureHandlerImpl handler = new AuthenticationFailureHandlerImpl(
+				);
+		return handler;
+	}
+
+	
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth)
 			throws Exception {
@@ -214,5 +248,30 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public Facebook facebook(ConnectionRepository repo) {
 	Connection<Facebook> connection = repo.findPrimaryConnection(Facebook.class);
 		return connection != null ? connection.getApi() : null;
+	}
+
+	class AuthenticationFailureHandlerImpl extends SimpleUrlAuthenticationFailureHandler {
+		 @Override
+         public void onAuthenticationFailure(
+                 HttpServletRequest request,
+                 HttpServletResponse response,
+                 AuthenticationException ae) throws IOException, ServletException {
+                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                 }
+	}	
+	
+	class AuthenticationSuccessHandlerImpl extends SimpleUrlAuthenticationSuccessHandler {
+	    @Override
+	    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, 
+	      Authentication authentication) throws ServletException, IOException {
+	        CurrentUser cuser = (CurrentUser) authentication.getPrincipal();
+	        UserDTO user = new UserDTO(cuser.getUser());
+	        
+	        response.setStatus(HttpServletResponse.SC_OK);
+	        response.getWriter().write(gson.toJson(user));
+	        response.getWriter().flush();
+	        response.getWriter().close();	        
+	        clearAuthenticationAttributes(request);
+	    }
 	}
 }

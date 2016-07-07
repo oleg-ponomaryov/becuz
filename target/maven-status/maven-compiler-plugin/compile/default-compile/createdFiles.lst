@@ -6,6 +6,7 @@ co/becuz/repositories/CollectionRepository.class
 co/becuz/social/SocialMediaTypes.class
 co/becuz/configuration/SecurityConfiguration.class
 co/becuz/dto/response/PhotoSaveResponse.class
+co/becuz/configuration/SecurityConfiguration$AuthenticationSuccessHandlerImpl.class
 co/becuz/services/PhotoServiceImpl.class
 co/becuz/controllers/LoginController.class
 co/becuz/controllers/PhotoController.class
@@ -15,6 +16,7 @@ co/becuz/services/FrameServiceImpl.class
 co/becuz/social/service/UserTaskService.class
 co/becuz/configuration/WebConfiguration.class
 co/becuz/repositories/PhotoRepository.class
+co/becuz/dto/UserDTO.class
 co/becuz/util/S3FormSigner.class
 co/becuz/controllers/ExceptionHandlerControllerAdvice.class
 co/becuz/filters/FacebookTokenAuthenticationFilter.class
@@ -55,6 +57,7 @@ co/becuz/services/UserServiceImpl.class
 co/becuz/services/currentuser/CurrentUserService.class
 co/becuz/domain/Collection.class
 co/becuz/forms/UserCreateForm.class
+co/becuz/configuration/SecurityConfiguration$AuthenticationFailureHandlerImpl.class
 co/becuz/filters/FacebookUserDetails.class
 co/becuz/util/PhotoUploadFormSigner.class
 co/becuz/controllers/StaticImageController.class

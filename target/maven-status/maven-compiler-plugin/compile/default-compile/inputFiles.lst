@@ -22,6 +22,7 @@
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/social/SocialUserDetails.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/util/S3FormSigner.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/social/dto/FacebookDTO.java
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/dto/UserDTO.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/CollectionPhotosService.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/util/PhotoUploadFormSigner.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/configuration/ConfigurationProvider.java

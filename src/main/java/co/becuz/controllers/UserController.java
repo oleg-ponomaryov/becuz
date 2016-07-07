@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -139,6 +140,10 @@ public class UserController {
     
     @RequestMapping(value = "/users",method=RequestMethod.POST)
     public @ResponseBody User create(@RequestBody User user) {
+    	
+        if (user.getPassword()!=null && !user.getPassword().isEmpty()) {
+        	user.setPasswordHash(new BCryptPasswordEncoder().encode(user.getPassword()));
+        }
       return userService.save(user);
     }
     
@@ -149,6 +154,10 @@ public class UserController {
     
     @RequestMapping(method=RequestMethod.PUT, value="/users/{id}")
     public @ResponseBody User update(@PathVariable String id, @RequestBody User user) {
+      if (user.getPassword()!=null && !user.getPassword().isEmpty()) {
+          user.setPasswordHash(new BCryptPasswordEncoder().encode(user.getPassword()));
+      }
+    	
       return userService.update(user);
     }
     
