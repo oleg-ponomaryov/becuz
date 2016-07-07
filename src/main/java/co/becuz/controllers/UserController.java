@@ -138,6 +138,11 @@ public class UserController {
         return userService.getAllUsers();
     }
     
+    @RequestMapping(value = "/users/initial",method=RequestMethod.POST)
+    public @ResponseBody User createInitialUser(@RequestBody User user) {
+      return create(user);
+    }
+    
     @RequestMapping(value = "/users",method=RequestMethod.POST)
     public @ResponseBody User create(@RequestBody User user) {
     	

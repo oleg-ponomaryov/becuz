@@ -79,6 +79,26 @@ public class Frame implements Serializable {
 	@Setter
     private int photoHeight;
     
+    @Column(name = "margin_left")
+	@Getter
+	@Setter
+    private double marginLeft=0.0;
+    
+    @Column(name = "margin_right")
+	@Getter
+	@Setter
+    private double marginRight=0.0;
+
+    @Column(name = "margin_top")
+	@Getter
+	@Setter
+    private double marginTop=0.0;
+
+    @Column(name = "margin_bottom")
+	@Getter
+	@Setter
+    private double marginBottom=0.0;
+    
     @Column(name = "created", nullable = false, updatable = false)
 	@Getter
 	@Setter
