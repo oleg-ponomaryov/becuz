@@ -121,24 +121,6 @@ public class PhotoController {
 		return "photo_upload";
 	}
 
-/*
-	@RequestMapping(value = "/photo/upload", method = RequestMethod.GET)
-	public @ResponseBody PhotoUploadFormSigner imageUpload(HttpServletRequest request,
-			@ModelAttribute CurrentUser currentUser) {
-		// Photo redirect URL
-		String redirectUrl = request.getScheme() + "://"
-				+ request.getServerName() + ":" + request.getServerPort()
-				+ request.getContextPath() + "/photo/ingest";
-		// Prepare S3 form upload
-		PhotoUploadFormSigner formSigner = new PhotoUploadFormSigner(
-				config.getProperty("S3_UPLOAD_BUCKET"),
-				config.getProperty("S3_UPLOAD_PREFIX"), currentUser, config,
-				redirectUrl, commonService);
-		
-		return formSigner;
-	}
-*/
-
 	@RequestMapping(value = "/photo/upload", method = RequestMethod.POST)
 	public @ResponseBody PhotoUploadFormSigner imageUpload(HttpServletRequest request,
 			@ModelAttribute CurrentUser currentUser, @RequestBody PhotoUploadRequestDTO dto) {
@@ -186,5 +168,15 @@ public class PhotoController {
 			throw new NoSuchElementException("CollectionId is required");
 		}
 		return photoService.save(bucket, photoKey,collectionId,currentUser);
+	}
+	
+	@RequestMapping(value = "/photo/url/{photoId}", method = RequestMethod.GET)
+	public @ResponseBody PhotoDTO urlGet(@PathVariable String photoId, @ModelAttribute CurrentUser currentUser) {
+		Photo photo = photoRepository.getOne(photoId);
+		PhotoDTO dto = new PhotoDTO();
+		if (photo != null) {
+			dto = photoService.generateExpiringUrl(photo, 500000);
+		}
+		return dto;
 	}
 }

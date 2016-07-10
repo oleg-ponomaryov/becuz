@@ -76,6 +76,11 @@ public class Photo implements Serializable {
 	@Setter
 	private Date updated;
 	
+	@Transient
+	@Getter
+	@Setter
+	private String photoUrl;
+	
 	@OneToMany(mappedBy = "photo", cascade = CascadeType.ALL)
 	private Set<CollectionPhotos> colectionPhotos = new HashSet<CollectionPhotos>();
 	

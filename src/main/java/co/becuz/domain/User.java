@@ -50,7 +50,6 @@ public class User implements Serializable {
 	private String email;
 
 	@Transient
-	//@JsonIgnore
 	private String password;
 	
 	@Column(name = "password_hash", nullable = false)

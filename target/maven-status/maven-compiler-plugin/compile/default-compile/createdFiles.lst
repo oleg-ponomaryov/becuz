@@ -46,6 +46,7 @@ co/becuz/services/CollectionPhotosService.class
 co/becuz/services/CommonService.class
 co/becuz/domain/Photo.class
 co/becuz/repositories/CollectionPhotosRepository.class
+co/becuz/dto/CollectionDTO.class
 co/becuz/SpringBootWebApplication.class
 co/becuz/dto/response/StaticImage.class
 co/becuz/dto/PhotoUploadRequestDTO.class

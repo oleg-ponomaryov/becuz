@@ -34,6 +34,7 @@
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/domain/Collection.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/dto/response/PhotoSaveResponse.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/CollectionServiceImpl.java
+/Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/dto/CollectionDTO.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/repositories/PhotoRepository.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/services/currentuser/CurrentUserDetailsService.java
 /Users/oleg.ponomaryov/Git/becuz/src/main/java/co/becuz/bootstrap/FramesLoader.java

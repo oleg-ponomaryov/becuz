@@ -1,6 +1,9 @@
 package co.becuz.controllers;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +17,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import co.becuz.domain.Collection;
+import co.becuz.domain.CollectionPhotos;
+import co.becuz.domain.Photo;
 import co.becuz.domain.nottables.CurrentUser;
+import co.becuz.dto.CollectionDTO;
+import co.becuz.dto.PhotoDTO;
+import co.becuz.services.CollectionPhotosService;
 import co.becuz.services.CollectionService;
+import co.becuz.services.PhotoService;
 
 @Controller
 public class CollectionController {
@@ -23,6 +32,12 @@ public class CollectionController {
     private final CollectionService collectionService;
     private static final Logger log = LoggerFactory
 			.getLogger(CollectionController.class);
+   
+    @Autowired
+    private CollectionPhotosService collectionPhotoService;
+
+	@Autowired
+	private PhotoService photoService;
     
     @Autowired
     public CollectionController(CollectionService collectionService) {
@@ -60,4 +75,30 @@ public class CollectionController {
     		throw new NoSuchElementException(String.format("Collection=%s not found", id));
     	}
     }
+    
+    @RequestMapping(method=RequestMethod.GET, value="/collections/photos/{id}")
+    public @ResponseBody CollectionDTO getCollectionPhotos(@PathVariable String id) {
+    	if (id==null || id.isEmpty()) {
+    		throw new NoSuchElementException("Collection Id can not be empty!");
+    	}
+    	
+    	Collection collection = collectionService.getCollectionById(id);
+    	if (collection==null) {
+    		throw new NoSuchElementException(String.format("Collection=%s not found", id));
+    	}
+    	
+    	java.util.Collection<CollectionPhotos> collectionPhotos = collectionPhotoService.getAllCollectionPhotosByCollection(collection);
+    	CollectionDTO dto = new CollectionDTO();
+    	Set<PhotoDTO> photos = new HashSet<PhotoDTO>();
+    	
+    	for (CollectionPhotos c : collectionPhotos) {
+    		Photo p = c.getPhoto();
+    		PhotoDTO d = photoService.generateExpiringUrl(p, 50000);
+    		photos.add(d);
+    	}
+
+    	dto.setCollection(collection);
+    	dto.setPhotos(photos);
+    	return dto;
+    }    
 }

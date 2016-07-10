@@ -179,7 +179,7 @@ public class PhotoServiceImpl implements PhotoService {
 		generatePresignedUrlRequest.setMethod(HttpMethod.GET);
 		generatePresignedUrlRequest.setExpiration(expiration);
 		PhotoDTO dto = new PhotoDTO();
-		dto.setInageId(photo.getId());
+		dto.setPhotoId(photo.getId());
 		dto.setExpiringUrl(s3Client
 				.generatePresignedUrl(generatePresignedUrlRequest));
 		// Expiring URL for thumbnail photo
