@@ -23,7 +23,8 @@ public class PhotoUploadFormSigner extends S3FormSigner {
 	private String signature;
 	private String uuid;
 	private CurrentUser user;
-	private AWSCredentialsProvider credsProvider;
+	private boolean isToken;
+	private String accessKey;
 	private CommonService commonService;
 
 	public PhotoUploadFormSigner(String s3Bucket, String keyPrefix, CurrentUser user,
@@ -32,7 +33,8 @@ public class PhotoUploadFormSigner extends S3FormSigner {
 		this.keyPrefix = keyPrefix;
 		this.successActionRedirect = successActionRedirect;
 		this.user = user;
-		this.credsProvider = config.getAWSCredentialsProvider();
+		AWSCredentialsProvider credsProvider = config.getAWSCredentialsProvider();
+		this.accessKey = credsProvider.getCredentials().getAWSAccessKeyId();
 		this.uuid = UUID.randomUUID().toString();
 		String policy = super.generateUploadPolicy(s3Bucket, keyPrefix,
 				credsProvider, successActionRedirect);
@@ -43,6 +45,7 @@ public class PhotoUploadFormSigner extends S3FormSigner {
 		this.encodedPolicy = policyAndSig[0];
 		this.signature = policyAndSig[1];
 		this.commonService = commonService;
+		this.isToken = credsProvider.getCredentials() instanceof BasicSessionCredentials;
 	}
 
 	/**
@@ -52,8 +55,8 @@ public class PhotoUploadFormSigner extends S3FormSigner {
 		this.objectKey = this.keyPrefix + "/original/" + user.getId();
 	}
 
-	public AWSCredentialsProvider getCredsProvider() {
-		return credsProvider;
+	public String getAccessKey() {
+		return accessKey;
 	}
 
 	public String getS3Bucket() {
@@ -85,7 +88,7 @@ public class PhotoUploadFormSigner extends S3FormSigner {
 	}
 
 	public Boolean getIsToken() {
-		return credsProvider.getCredentials() instanceof BasicSessionCredentials;
+		return this.isToken;
 	}
 
 	public String getSuccessActionRedirect() {
