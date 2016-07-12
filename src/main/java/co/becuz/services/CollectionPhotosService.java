@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import co.becuz.domain.CollectionPhotos;
 import co.becuz.domain.Photo;
+import co.becuz.dto.CollectionDTO;
 
 public interface CollectionPhotosService {
 	CollectionPhotos getCollectionPhotosById(String id);
@@ -17,4 +18,6 @@ public interface CollectionPhotosService {
 	void delete(String id);
 
 	CollectionPhotos save(CollectionPhotos collectionPhotos);
+
+	CollectionDTO getPhotosWithUrls(co.becuz.domain.Collection collection);
 }

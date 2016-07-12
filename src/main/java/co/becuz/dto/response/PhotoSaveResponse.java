@@ -1,9 +1,10 @@
 package co.becuz.dto.response;
 
 import java.io.Serializable;
+
 import lombok.Getter;
 import lombok.Setter;
-import co.becuz.domain.CollectionPhotos;
+import co.becuz.dto.CollectionDTO;
 
 public class PhotoSaveResponse implements Serializable {
 
@@ -11,7 +12,7 @@ public class PhotoSaveResponse implements Serializable {
 
 	@Getter
 	@Setter
-	private CollectionPhotos collectionPhotos; 
+	private CollectionDTO collectionPhotos; 
 
 	@Getter
 	@Setter

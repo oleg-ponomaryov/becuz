@@ -87,18 +87,6 @@ public class CollectionController {
     		throw new NoSuchElementException(String.format("Collection=%s not found", id));
     	}
     	
-    	java.util.Collection<CollectionPhotos> collectionPhotos = collectionPhotoService.getAllCollectionPhotosByCollection(collection);
-    	CollectionDTO dto = new CollectionDTO();
-    	Set<PhotoDTO> photos = new HashSet<PhotoDTO>();
-    	
-    	for (CollectionPhotos c : collectionPhotos) {
-    		Photo p = c.getPhoto();
-    		PhotoDTO d = photoService.generateExpiringUrl(p, 50000);
-    		photos.add(d);
-    	}
-
-    	dto.setCollection(collection);
-    	dto.setPhotos(photos);
-    	return dto;
+    	return collectionPhotoService.getPhotosWithUrls(collection);
     }    
 }

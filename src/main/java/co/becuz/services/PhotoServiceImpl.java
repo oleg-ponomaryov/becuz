@@ -1,5 +1,6 @@
 package co.becuz.services;
 
+import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -146,7 +147,6 @@ public class PhotoServiceImpl implements PhotoService {
 		photo.setUploadedDate(new Date());
 
 		Photo p = photoRepository.save(photo);
-		
 		CollectionPhotos col = collectionPhotosService.getCollectionPhotosByPhotoAndCollection(photo, collection);
 		
 		if ( col != null) {
@@ -161,7 +161,7 @@ public class PhotoServiceImpl implements PhotoService {
 			resp.setStatus("SUCCESS");
 		}
 
-		resp.setCollectionPhotos(col);
+		resp.setCollectionPhotos(collectionPhotosService.getPhotosWithUrls(collection));
 		
 		return resp;
 	}
@@ -180,8 +180,10 @@ public class PhotoServiceImpl implements PhotoService {
 		generatePresignedUrlRequest.setExpiration(expiration);
 		PhotoDTO dto = new PhotoDTO();
 		dto.setPhotoId(photo.getId());
-		dto.setExpiringUrl(s3Client
-				.generatePresignedUrl(generatePresignedUrlRequest));
+		URL url = s3Client
+				.generatePresignedUrl(generatePresignedUrlRequest);
+		dto.setExpiringUrl(url);
+		LOG.info("Generated URL->"+url);
 		// Expiring URL for thumbnail photo
 		if (photo.getThumbnailKey() != null) {
 			generatePresignedUrlRequest = new GeneratePresignedUrlRequest(
