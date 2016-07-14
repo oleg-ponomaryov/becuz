@@ -30,13 +30,13 @@ public class CollectionPhotosServiceImpl implements CollectionPhotosService {
 	@Override
 	public java.util.Collection<CollectionPhotos> getAllCollectionPhotosByCollection(
 			Collection collection) {
-		return collectionPhotosRepository.findAllByCollection(collection);
+		return collectionPhotosRepository.findAllByCollectionOrderByCreatedDesc(collection);
 	}
 
 	@Override
 	public java.util.Collection<CollectionPhotos> getAllCollectionPhotosByPhoto(
 			Photo photo) {
-		return collectionPhotosRepository.findAllByPhoto(photo);
+		return collectionPhotosRepository.findAllByPhotoOrderByCreatedDesc(photo);
 	}
 
 	@Override

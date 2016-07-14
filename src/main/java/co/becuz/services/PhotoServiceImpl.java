@@ -180,6 +180,8 @@ public class PhotoServiceImpl implements PhotoService {
 		generatePresignedUrlRequest.setExpiration(expiration);
 		PhotoDTO dto = new PhotoDTO();
 		dto.setPhotoId(photo.getId());
+		dto.setMd5Digest(photo.getMd5Digest());
+		dto.setCaption(photo.getCaption());
 		URL url = s3Client
 				.generatePresignedUrl(generatePresignedUrlRequest);
 		dto.setExpiringUrl(url);

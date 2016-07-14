@@ -21,4 +21,11 @@ public class PhotoDTO implements Serializable {
 	@Setter
 	private URL expiringThumbnailUrl;
 	
+	@Getter
+	@Setter
+	private String md5Digest;
+
+	@Getter
+	@Setter
+    private String caption;
 }

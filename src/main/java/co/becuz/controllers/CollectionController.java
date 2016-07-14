@@ -1,9 +1,6 @@
 package co.becuz.controllers;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import co.becuz.domain.Collection;
-import co.becuz.domain.CollectionPhotos;
-import co.becuz.domain.Photo;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.CollectionDTO;
-import co.becuz.dto.PhotoDTO;
 import co.becuz.services.CollectionPhotosService;
 import co.becuz.services.CollectionService;
 import co.becuz.services.PhotoService;
