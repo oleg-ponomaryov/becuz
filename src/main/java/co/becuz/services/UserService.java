@@ -3,6 +3,7 @@ package co.becuz.services;
 import java.util.Collection;
 
 import co.becuz.domain.User;
+import co.becuz.dto.CreateUserDTO;
 import co.becuz.forms.UserCreateForm;
 
 public interface UserService {
@@ -22,5 +23,7 @@ public interface UserService {
 	User save(User user);
 
 	User update(User user);
+
+	User createSelf(CreateUserDTO userdto);
 
 }

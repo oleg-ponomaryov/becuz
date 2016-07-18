@@ -2,6 +2,8 @@ package co.becuz.controller;
 
 import static org.junit.Assert.*;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import org.apache.http.HttpStatus;
@@ -12,6 +14,8 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
@@ -22,9 +26,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import co.becuz.SpringBootWebApplication;
+import co.becuz.bootstrap.FramesLoader;
 import co.becuz.domain.User;
 import co.becuz.domain.enums.Role;
 import co.becuz.repositories.UserRepository;
+import co.becuz.services.EncryptionService;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.authentication.FormAuthConfig;
@@ -38,16 +44,27 @@ import com.jayway.restassured.response.Response;
 public class UserControllerTest {
 
     @Autowired
-    UserRepository repository;
+    private UserRepository repository;
 
+    @Autowired
+    private EncryptionService encryptionService;
+    
     User john;
     User oleg;
     User mary;
     User demo;
 
     @Value("${local.server.port}")
-    int port;
+    private int port;
+
+    @Value("${app.bundle.id}")
+    private String appId;
+    
     private static boolean setUpIsDone = false;
+
+	private static Logger LOGGER = LoggerFactory
+			.getLogger(UserControllerTest.class);
+
     
     @Before
     public void setUp() {
@@ -85,6 +102,24 @@ public class UserControllerTest {
         setUpIsDone = true;
     }
 
+    @Test
+    public void createSelfUser() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    	String iv = "1234567890123456";
+    	
+    	String dto = "{\"user\":{\"email\":\""+encryptionService.encrypt("oleg@quantlance.com", iv.getBytes("UTF-8"))+"\",\"password\":\""+encryptionService.encrypt("demo", iv.getBytes("UTF-8"))+"\"},\"appId\":\""+encryptionService.encrypt(appId, iv.getBytes("UTF-8"))+"\",\"iv\":\"1234567890123456\"}";
+
+    	LOGGER.info(dto);
+    	
+        Response resp = RestAssured.given().contentType("application/json\r\n").with().body(dto).when().post("/user/create");
+        resp.prettyPrint();
+        
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_OK);
+    	
+    	return;
+    }
+    
     @Test
     public void createUser() {
         String j = "{\"email\":\"jane@jane.com\",\"role\":\"USER\",\"password\":\"123\",\"username\":\"jane\",\"photoUrl\":\"http://\"}";

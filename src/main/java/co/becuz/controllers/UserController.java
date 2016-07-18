@@ -4,8 +4,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.NoSuchElementException;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import co.becuz.domain.User;
+import co.becuz.dto.CreateUserDTO;
 import co.becuz.forms.UserCreateForm;
 import co.becuz.services.UserService;
 import co.becuz.validators.UserCreateFormValidator;
@@ -58,26 +61,6 @@ public class UserController {
     	else {
     		throw new NoSuchElementException(String.format("User=%s not found", id));
     	}
-    }
-
-    @RequestMapping(value = "/user/create", method = RequestMethod.GET)
-    public String getUserCreatePage(Model model) {
-        model.addAttribute("form", new UserCreateForm());
-        return "user_create";
-    }
-
-    @RequestMapping(value = "/user/create", method = RequestMethod.POST)
-    public String handleUserCreateForm(@Valid @ModelAttribute("form") UserCreateForm form, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "user_create";
-        }
-        try {
-            userService.create(form);
-        } catch (DataIntegrityViolationException e) {
-            bindingResult.reject("email.exists", "Email already exists");
-            return "user_create";
-        }
-        return "redirect:/users/all";
     }
 
     @RequestMapping(value = "/user/update", method = RequestMethod.POST)
@@ -138,11 +121,6 @@ public class UserController {
         return userService.getAllUsers();
     }
     
-    @RequestMapping(value = "/users/initial",method=RequestMethod.POST)
-    public @ResponseBody User createInitialUser(@RequestBody User user) {
-      return create(user);
-    }
-    
     @RequestMapping(value = "/users",method=RequestMethod.POST)
     public @ResponseBody User create(@RequestBody User user) {
     	
@@ -182,4 +160,40 @@ public class UserController {
     public @ResponseBody String getCurrentTime() {
     	return Long.toString(new Date().getTime());
     }
+    
+    @RequestMapping(value = "/user/create", method = RequestMethod.POST)
+    public @ResponseBody User createUser(@RequestBody CreateUserDTO userdto, HttpServletResponse response) {
+    	
+    	User user = null;
+    	try {
+    		user = userdto.getUser();
+    		String appId = userdto.getAppId();
+    		String iv = userdto.getIv();
+    		if (user==null || StringUtils.isEmpty(user.getEmail())  || StringUtils.isEmpty(appId) || 
+    				StringUtils.isEmpty(iv) || StringUtils.isEmpty(user.getPassword())) {
+    			throw new NoSuchElementException ("Bad request");	
+    		}
+    		
+    		return  userService.createSelf(userdto);
+    		
+     	}
+    	catch (Exception e) {
+    		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    	}
+    	
+    	return null;
+    }
+    
+    @RequestMapping(value = "/user/update", method = RequestMethod.PUT)
+    public @ResponseBody User updateUser(@RequestBody User user) {
+    	// 0. Only can be called by USER Role, ADMIN use regular /users/ PUT (update)
+    	// 1.Only allowed to update itself
+    	// 2. Not allowed to changed Role (from User to Admin and back)
+    	// 3. Only certain fileds can be changed (define those)
+    	
+    	return null;
+    }
+
+    
+    
 }

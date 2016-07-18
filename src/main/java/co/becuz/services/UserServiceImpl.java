@@ -1,15 +1,33 @@
 package co.becuz.services;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import co.becuz.domain.User;
+import co.becuz.domain.enums.Role;
+import co.becuz.domain.nottables.CurrentUser;
+import co.becuz.dto.CreateUserDTO;
 import co.becuz.forms.UserCreateForm;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.repositories.UserRepository;
@@ -23,6 +41,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PhotoRepository photoRepository;
+
+    @Autowired
+    private EncryptionService encryptionService;
     
     @Override
     public User getUserById(String id) {
@@ -106,4 +127,48 @@ public class UserServiceImpl implements UserService {
     	
         return userRepository.save(us);
     }
+
+	@Override
+	public User createSelf(CreateUserDTO userdto)  {
+		
+		byte[] iv;
+		try {
+			iv = userdto.getIv().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException("UTF-8 not supported");
+		}
+		
+		String dappId = encryptionService.decrypt(userdto.getAppId(), iv);
+		if (dappId==null || !dappId.equals(encryptionService.getAppId())) {
+        	throw new IllegalStateException("Application bundles ids don't match");
+		}
+
+		String email = encryptionService.decrypt(userdto.getUser().getEmail(), iv);
+		if (!EmailValidator.getInstance().isValid(email)) {
+        	throw new IllegalStateException("Email format is not valid");
+		}
+		
+		Collection<User> existingUsers = getUserByEmail(email);
+		if (existingUsers != null && existingUsers.size()>0) {
+        	throw new IllegalStateException(String.format("User with email %s already exists", email));
+		}
+
+		String password = encryptionService.decrypt(userdto.getUser().getPassword(), iv);
+		if (StringUtils.isEmpty(password)) {
+        	throw new IllegalStateException("Password is not valid");
+		}
+		
+    	User user = new User();
+        user.setEmail(email);
+        user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
+        user.setRole(Role.USER);
+        
+		CurrentUser userDetails = new CurrentUser(user);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		
+		SecurityContextHolder.clearContext();
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return userRepository.save(user);
+	}
 }
