@@ -4,19 +4,24 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import co.becuz.domain.enums.DisplayType;
 import co.becuz.domain.enums.FrameStatus;
+import co.becuz.json.JsonDateSerializer;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "frames")
+@EqualsAndHashCode(of = { "id" })
 public class Frame implements Serializable {
 
 	private static final long serialVersionUID = -4877835913432049038L;
@@ -87,11 +92,13 @@ public class Frame implements Serializable {
     @Column(name = "created", nullable = false, updatable = false)
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
     private Date created;
 
 	@Column(name = "updated")
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date updated;
 
 	@OneToMany(mappedBy = "frame", cascade = CascadeType.ALL)

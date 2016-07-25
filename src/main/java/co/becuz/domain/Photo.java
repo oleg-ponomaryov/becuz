@@ -4,17 +4,22 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import co.becuz.json.JsonDateSerializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "photos", indexes = { @Index(name = "owner_idx", columnList = "owner_id"), @Index(name = "md5_digest_idx", columnList = "md5_digest")})
-
+@EqualsAndHashCode(of = { "id" })
 public class Photo implements Serializable {
 	private static final long serialVersionUID = -2762093398070254170L;
 
@@ -59,6 +64,7 @@ public class Photo implements Serializable {
     @Column(name = "uploaded_date", nullable = false)
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
     private Date uploadedDate;
     
     @Column(name = "description", nullable = true)
@@ -69,11 +75,13 @@ public class Photo implements Serializable {
     @Column(name = "created", nullable = false, updatable = false)
 	@Getter
 	@Setter
-    private Date created;
+	@JsonSerialize(using=JsonDateSerializer.class)
+	private Date created;
 
 	@Column(name = "updated")
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date updated;
 	
 	@Transient

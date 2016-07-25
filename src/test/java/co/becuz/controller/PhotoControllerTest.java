@@ -1,19 +1,5 @@
 package co.becuz.controller;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.http.HttpStatus;
-
-import static org.hamcrest.Matchers.*;
-
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,40 +7,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import co.becuz.SpringBootWebApplication;
 import co.becuz.domain.Collection;
 import co.becuz.domain.Frame;
-import co.becuz.domain.Photo;
 import co.becuz.domain.User;
 import co.becuz.domain.enums.Role;
-import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoUploadRequestDTO;
 import co.becuz.repositories.FrameRepository;
 import co.becuz.repositories.PhotoRepository;
-import co.becuz.repositories.UserRepository;
 import co.becuz.services.PhotoService;
 import co.becuz.services.UserService;
-import co.becuz.util.PhotoUploadFormSigner;
 
 import com.amazonaws.util.json.JSONException;
-import com.amazonaws.util.json.JSONObject;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.authentication.FormAuthConfig;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.response.Response;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.authentication.FormAuthConfig;
+import com.jayway.restassured.response.Response;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SpringBootWebApplication.class)

@@ -1,6 +1,7 @@
 package co.becuz.services;
 
 import java.util.Collection;
+import java.util.Map;
 
 import co.becuz.domain.User;
 import co.becuz.dto.CreateUserDTO;
@@ -26,4 +27,5 @@ public interface UserService {
 
 	User createSelf(CreateUserDTO userdto);
 
+	Map<String, String> swap(String id, User user);
 }

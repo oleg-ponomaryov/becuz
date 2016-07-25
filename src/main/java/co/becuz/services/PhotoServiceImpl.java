@@ -71,8 +71,8 @@ public class PhotoServiceImpl implements PhotoService {
     }
 
 	@Override
-	public java.util.Collection<Photo> listAllPhotosForUser(String Id) {
-        return photoRepository.findAllByOwner(userRepository.getOne(Id));
+	public java.util.Collection<Photo> listAllPhotosForUser(String id) {
+        return photoRepository.findAllByOwnerId(id);
 	}
 
 	@Override

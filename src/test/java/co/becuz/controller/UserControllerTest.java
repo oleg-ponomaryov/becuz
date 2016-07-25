@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.http.HttpStatus;
 
@@ -26,9 +27,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import co.becuz.SpringBootWebApplication;
-import co.becuz.bootstrap.FramesLoader;
+import co.becuz.domain.Collection;
+import co.becuz.domain.Frame;
+import co.becuz.domain.Photo;
 import co.becuz.domain.User;
+import co.becuz.domain.enums.FrameOwner;
 import co.becuz.domain.enums.Role;
+import co.becuz.repositories.CollectionRepository;
+import co.becuz.repositories.FrameRepository;
+import co.becuz.repositories.PhotoRepository;
 import co.becuz.repositories.UserRepository;
 import co.becuz.services.EncryptionService;
 
@@ -48,6 +55,15 @@ public class UserControllerTest {
 
     @Autowired
     private EncryptionService encryptionService;
+    
+    @Autowired
+    private FrameRepository frameRepository;
+
+    @Autowired
+    private CollectionRepository collectionRepository;
+
+    @Autowired
+    private PhotoRepository photoRepository;
     
     User john;
     User oleg;
@@ -94,7 +110,6 @@ public class UserControllerTest {
         mary.setEmail("mary@mary.com");
         mary.setPhotoUrl("http://");
 
-        //repository.deleteAll();
         repository.save(Arrays.asList(john, oleg, mary));
 
         RestAssured.port = port;
@@ -191,7 +206,6 @@ public class UserControllerTest {
     
     @Test
     public void getUser() {
-
         assertEquals(repository.findAllByEmail("mary@mary.com").size(), 1);
         User mary = repository.findAllByEmail("mary@mary.com").iterator().next();
 
@@ -203,6 +217,88 @@ public class UserControllerTest {
         .statusCode(HttpStatus.SC_OK)
         .body("username", Matchers.is("mary"))
         .body("email", Matchers.is("mary@mary.com"));
+
+        return;
+    }
+
+    @Test
+    public void swapUsers() {
+    	
+        RestAssured.authentication = RestAssured.form("oleg@oleg.com", "123", new FormAuthConfig("/login", "email", "password"));
+    	
+        assertEquals(repository.findAllByEmail("oleg@oleg.com").size(),1);
+
+       	Frame frame = new Frame();
+    	frame.setUrl("http://becuz.net");
+    	frame = frameRepository.save(frame);
+        
+        Collection collection = new Collection();
+        collection.setFrame(frame);
+        collection.setHeadline("My headline");
+        collection.setOwnerType(FrameOwner.OWNER);
+        collection.setUser(demo);
+
+        Collection collection1 = new Collection();
+        collection1.setFrame(frame);
+        collection1.setHeadline("My headline1");
+        collection1.setOwnerType(FrameOwner.OWNER);
+        collection1.setUser(demo);
+
+        collectionRepository.save(Arrays.asList(collection, collection1));
+        
+    	Photo p0 = new Photo();
+    	p0.setBucket("becuz0");
+    	p0.setCaption("My caption0");
+    	p0.setMd5Digest("eeeeee0");
+    	p0.setOriginalKey("/upload/file");
+    	p0.setOwner(demo);
+    	p0.setUploadedDate(new Date());
+    	photoRepository.save(p0);
+
+    	Photo p1 = new Photo();
+    	p1.setBucket("becuz0");
+    	p1.setCaption("My caption1");
+    	p1.setMd5Digest("eeeeee1");
+    	p1.setOriginalKey("/upload/file");
+    	p1.setOwner(demo);
+    	p1.setUploadedDate(new Date());
+    	photoRepository.save(p1);
+
+    	Photo p2 = new Photo();
+    	p2.setBucket("becuz0");
+    	p2.setCaption("My caption2");
+    	p2.setMd5Digest("eeeeee2");
+    	p2.setOriginalKey("/upload/file");
+    	p2.setOwner(oleg);
+    	p2.setUploadedDate(new Date());
+    	photoRepository.save(p2);
+
+    	
+        Response resp = RestAssured.given().contentType("application/json\r\n").with().body(oleg.getId()).when().post("/user/swap");
+        resp.prettyPrint();
+        
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_BAD_REQUEST);
+
+    	
+        resp = RestAssured.given().contentType("application/json\r\n").with().body(demo.getId()).when().post("/user/swap");
+        resp.prettyPrint();
+        
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_OK)
+        .body("status", Matchers.is("success"))
+        .body("message", Matchers.anything("Assigned 2 photos"))
+        .body("message", Matchers.anything("assigned 2 collections"));
+
+        assertEquals(collectionRepository.findOne(collection.getId()).getUser(),oleg);
+        assertEquals(collectionRepository.findOne(collection1.getId()).getUser(),oleg);
+
+        assertEquals(photoRepository.findOne(p0.getId()).getOwner(),oleg);
+        assertEquals(photoRepository.findOne(p1.getId()).getOwner(),oleg);
+        
+        RestAssured.authentication = RestAssured.form("demo@quantlance.com", "demo", new FormAuthConfig("/login", "email", "password"));
 
         return;
     }

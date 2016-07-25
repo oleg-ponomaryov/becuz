@@ -2,6 +2,7 @@ package co.becuz.controllers;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -11,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import co.becuz.domain.User;
+import co.becuz.domain.enums.Role;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.CreateUserDTO;
 import co.becuz.forms.UserCreateForm;
 import co.becuz.services.UserService;
@@ -61,20 +63,6 @@ public class UserController {
     	else {
     		throw new NoSuchElementException(String.format("User=%s not found", id));
     	}
-    }
-
-    @RequestMapping(value = "/user/update", method = RequestMethod.POST)
-    public String handleUserUpdateForm(@Valid @ModelAttribute("form") UserCreateForm form, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "user_create";
-        }
-        try {
-            userService.update(form);
-        } catch (DataIntegrityViolationException e) {
-            bindingResult.reject("email.exists", "Email already exists");
-            return "user_create";
-        }
-        return "redirect:/users/all";
     }
     
     @RequestMapping("user/edit/{id}")
@@ -185,15 +173,42 @@ public class UserController {
     }
     
     @RequestMapping(value = "/user/update", method = RequestMethod.PUT)
-    public @ResponseBody User updateUser(@RequestBody User user) {
-    	// 0. Only can be called by USER Role, ADMIN use regular /users/ PUT (update)
-    	// 1.Only allowed to update itself
-    	// 2. Not allowed to changed Role (from User to Admin and back)
-    	// 3. Only certain fileds can be changed (define those)
-    	
+    public @ResponseBody User updateSelf(@RequestBody @Valid User user, @ModelAttribute CurrentUser currentUser, BindingResult errors, HttpServletResponse response) {
+    	if (errors.hasErrors()) {
+    		log.error("User validation errors");
+    		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    	}
+    	else if (!user.getId().equals(currentUser.getUser().getId())) {
+    		log.warn("Attempt to modify not self");
+    		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    	}
+    	else {
+	    	user.setRole(Role.USER);
+	        return userService.update(user);
+    	}
     	return null;
     }
 
-    
-    
+    @RequestMapping(value = "/user/swap", method = RequestMethod.POST)
+    public @ResponseBody Map<String,String> swapUsers(@RequestBody String id, @ModelAttribute CurrentUser currentUser, HttpServletResponse response) {
+    	if (StringUtils.isEmpty(id)) {
+    		log.error("Not found expected user id");
+    		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    	}
+    	else if (id.equals(currentUser.getUser().getId())) {
+    		log.error("Request for the same user");
+    		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    	}
+    	else {
+    		Map<String, String> resp = userService.swap(id, currentUser.getUser());
+    		if (resp.get("status").equals("warning")) {
+        		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    		}
+    		else if (resp.get("status").equals("error")) {
+        		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    		}
+	        return resp;
+    	}
+    	return null;
+    }
 }

@@ -2,10 +2,14 @@ package co.becuz.dto;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import lombok.Getter;
 import lombok.Setter;
 import co.becuz.domain.User;
 import co.becuz.domain.enums.Role;
+import co.becuz.json.JsonDateSerializer;
 import co.becuz.social.SocialMediaTypes;
 
 public class UserDTO implements Serializable {
@@ -41,6 +45,7 @@ public class UserDTO implements Serializable {
 	
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date dob;
 	
 	@Getter
@@ -49,10 +54,12 @@ public class UserDTO implements Serializable {
 
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date created;
 
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date updated;
 
 	public UserDTO(User user) {

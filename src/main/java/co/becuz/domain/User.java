@@ -19,6 +19,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,11 +27,14 @@ import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import co.becuz.domain.enums.Role;
+import co.becuz.json.JsonDateSerializer;
 import co.becuz.social.SocialMediaTypes;
 
 @Entity
+@EqualsAndHashCode(of = { "id" })
 @Table(name = "users",
 	indexes = { @Index(name = "user_email_idx", columnList = "email"), @Index(name = "user_name_provider_idx",
 	columnList = "username,sign_in_provider")})
@@ -88,6 +92,7 @@ public class User implements Serializable {
 	@Column(name = "dob")
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date dob;
 	
 	@Column(name = "photourl", length = 500)
@@ -98,11 +103,13 @@ public class User implements Serializable {
 	@Column(name = "created")
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date created;
 
 	@Column(name = "updated")
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date updated;
 
 	@JsonIgnore

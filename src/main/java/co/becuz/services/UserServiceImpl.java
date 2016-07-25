@@ -1,21 +1,16 @@
 package co.becuz.services;
 
 import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,11 +19,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import co.becuz.domain.Photo;
 import co.becuz.domain.User;
 import co.becuz.domain.enums.Role;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.CreateUserDTO;
 import co.becuz.forms.UserCreateForm;
+import co.becuz.repositories.CollectionRepository;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.repositories.UserRepository;
 
@@ -43,7 +40,14 @@ public class UserServiceImpl implements UserService {
     private PhotoRepository photoRepository;
 
     @Autowired
+    private CollectionRepository collectionRepository;
+    
+    @Autowired
     private EncryptionService encryptionService;
+    
+    
+	private static final Logger LOG = LoggerFactory
+			.getLogger(UserServiceImpl.class);
     
     @Override
     public User getUserById(String id) {
@@ -91,7 +95,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(String id) {
-    	//photoRepository.deleteInBatch(photoRepository.findAllByOwner(userRepository.findOne(id)));
         userRepository.delete(id);
     }
 
@@ -107,6 +110,15 @@ public class UserServiceImpl implements UserService {
     		throw new NoSuchElementException(String.format("User=%s not found", user.getId()));
     	}
 
+    	if (user.getDob() != null)
+    		us.setDob(user.getDob());
+
+    	if (user.getFirstname() != null)
+    		us.setFirstname(user.getFirstname());
+
+    	if (user.getLastname() != null)
+    		us.setLastname(user.getLastname());
+    	
     	if (user.getPhotoUrl() != null)
     		us.setPhotoUrl(user.getPhotoUrl());
     	
@@ -122,15 +134,14 @@ public class UserServiceImpl implements UserService {
     	if (user.getEmail()!=null)
     		us.setEmail(user.getEmail());
         
-    	if (user.getPasswordHash()!=null)
-    		us.setPasswordHash(new BCryptPasswordEncoder().encode(user.getPasswordHash()));
+    	if (user.getPassword()!=null)
+    		us.setPasswordHash(new BCryptPasswordEncoder().encode(user.getPassword()));
     	
         return userRepository.save(us);
     }
 
 	@Override
 	public User createSelf(CreateUserDTO userdto)  {
-		
 		byte[] iv;
 		try {
 			iv = userdto.getIv().getBytes("UTF-8");
@@ -159,9 +170,34 @@ public class UserServiceImpl implements UserService {
 		}
 		
     	User user = new User();
-        user.setEmail(email);
-        user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
-        user.setRole(Role.USER);
+    	User udto = userdto.getUser();
+
+    	if (udto.getDob() != null)
+    		user.setDob(udto.getDob());
+
+    	if (udto.getFirstname() != null)
+    		user.setFirstname(udto.getFirstname());
+
+    	if (udto.getLastname() != null)
+    		user.setLastname(udto.getLastname());
+    	
+    	if (udto.getPhotoUrl() != null)
+    		user.setPhotoUrl(udto.getPhotoUrl());
+    	
+    	if (udto.getRole()!=null)
+    		user.setRole(udto.getRole());
+    		
+    	if (udto.getSigninprovider()!=null)
+    		user.setSigninprovider(udto.getSigninprovider());
+    		
+    	if (udto.getUsername()!=null)
+    		user.setUsername(udto.getUsername());
+    	
+    	if (password!=null)
+    		user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
+
+    	user.setRole(Role.USER);
+    	user.setEmail(email);
         
 		CurrentUser userDetails = new CurrentUser(user);
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -170,5 +206,44 @@ public class UserServiceImpl implements UserService {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return userRepository.save(user);
+	}
+	
+	@Override
+	@Transactional
+	public Map<String, String> swap(String id, User user)  {
+		Map<String, String> ret = new HashMap<String, String>();
+		Collection<Photo> photos = null;
+		Collection<co.becuz.domain.Collection> collections;
+		try {
+			// Check if user with <id> exists.
+	    	User us = getUserById(id);
+	    	if (us == null) {
+	    		ret.put("message", String.format("User with id:%s not found",id));
+	    		ret.put("status", "warning");
+	    		return ret;
+	    	}
+	
+	    	photos =  photoRepository.findAllByOwnerId(id);
+	    	for (Photo p : photos) {
+	    		p.setOwner(user);
+	    	}
+	    	photoRepository.save(photos);
+	    	
+	    	collections = collectionRepository.findAllByUserId(id);
+	    	for (co.becuz.domain.Collection c : collections) {
+	    		c.setUser(user);
+	    	}
+	    	collectionRepository.save(collections);
+		}
+		catch (Exception e) {
+			LOG.error("Error during users swap", e);
+    		ret.put("message", e.getMessage());
+    		ret.put("status", "error");
+    		return ret;
+		}
+    	
+		ret.put("message", String.format("Assigned %d photos to user %s; assigned %d collections to user %s",photos.size(), user.getId(), collections.size(), user.getId()));
+		ret.put("status", "success");
+		return ret;
 	}
 }

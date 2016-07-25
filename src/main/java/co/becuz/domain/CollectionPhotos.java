@@ -4,15 +4,20 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import co.becuz.json.JsonDateSerializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.io.Serializable;
 import java.util.Date;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "collectionphotos", indexes = { @Index(name = "photo_collections_idx", columnList = "photo_id,collection_id"), @Index(name = "photo_collections_collection_idx", columnList = "collection_id")})
-
+@EqualsAndHashCode(of = { "id" })
 public class CollectionPhotos implements Serializable {
 
 	private static final long serialVersionUID = 5768299756910219095L;
@@ -39,11 +44,13 @@ public class CollectionPhotos implements Serializable {
     @Column(name = "created", nullable = false, updatable = false)
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
     private Date created;
 
 	@Column(name = "updated")
 	@Getter
 	@Setter
+	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date updated;
 		
 		@PrePersist
