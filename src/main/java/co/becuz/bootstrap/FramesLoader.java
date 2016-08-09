@@ -25,12 +25,13 @@ public class FramesLoader implements ApplicationListener<ContextRefreshedEvent> 
  
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
- 
-        Frame frame = new Frame();
+        /*
+    	Frame frame = new Frame();
         frame.setDisplayType(DisplayType.SLIDESHOW);
         frame.setUrl("http://becuz.net/zep");
         frameRepository.save(frame);
         
         LOGGER.info("Frame is loaded - id: " + frame.getId());
+        */
     }
 }

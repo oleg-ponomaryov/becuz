@@ -1,6 +1,7 @@
 package co.becuz.controllers;
 
 import java.text.ParseException;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,7 +9,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -29,6 +29,7 @@ import co.becuz.domain.enums.Role;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
 import co.becuz.dto.PhotoUploadRequestDTO;
+import co.becuz.dto.response.PhotoDeleteResponse;
 import co.becuz.dto.response.PhotoSaveResponse;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.services.CollectionService;
@@ -126,7 +127,8 @@ public class PhotoController {
 			@ModelAttribute CurrentUser currentUser, @RequestBody PhotoUploadRequestDTO dto) {
 		Collection collection = dto.getCollection();
 		if (collection !=null) {
-			User user = userService.getUserById(collection.getUser().getId());
+			User user = userService.getUserById
+					(collection.getUser().getId());
 			Frame frame = frameService.getFrameById(collection.getFrame().getId());
 			if (user == null || frame==null) {
 				throw new NoSuchElementException("User and frame are required for a Collection");
@@ -157,6 +159,12 @@ public class PhotoController {
 				redirectUrl, commonService);
 		
 		return formSigner;
+	}
+
+	@RequestMapping(value = "/photo/delete", method = RequestMethod.POST)
+	public @ResponseBody PhotoDeleteResponse deletePhotos(@RequestBody List<Photo> photos,
+			@ModelAttribute CurrentUser currentUser) {
+		return photoService.delete(photos, currentUser) ;
 	}
 	
 	@RequestMapping(value = "/photo/ingest", method = RequestMethod.GET)

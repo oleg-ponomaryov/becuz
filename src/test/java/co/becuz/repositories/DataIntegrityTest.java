@@ -1,6 +1,7 @@
 package co.becuz.repositories;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
@@ -214,6 +215,25 @@ public class DataIntegrityTest {
     	p1.setUploadedDate(new Date());
     	photoRepository.save(p1);
 
+    	Photo p2 = new Photo();
+    	p2.setBucket("becuz0");
+    	p2.setCaption("My caption1002");
+    	p2.setMd5Digest("eeeeee1002");
+    	p2.setOriginalKey("/upload/file");
+    	p2.setOwner(u);
+    	p2.setUploadedDate(new Date());
+    	photoRepository.save(p2);
+
+    	Photo p3 = new Photo();
+    	p3.setBucket("becuz3");
+    	p3.setCaption("My caption2003");
+    	p3.setMd5Digest("eeeeee2003");
+    	p3.setOriginalKey("/upload/file");
+    	p3.setOwner(u);
+    	p3.setUploadedDate(new Date());
+    	photoRepository.save(p3);
+
+    	
     	
     	CollectionPhotos ph = new CollectionPhotos();
     	ph.setCollection(c);
@@ -222,7 +242,7 @@ public class DataIntegrityTest {
     	
     	CollectionPhotos ph1 = new CollectionPhotos();
     	ph1.setCollection(c1);
-    	ph1.setPhoto(p0);
+    	ph1.setPhoto(p2);
     	collectionPhRepository.save(ph1);
 
     	CollectionPhotos ph2 = new CollectionPhotos();
@@ -232,7 +252,7 @@ public class DataIntegrityTest {
     	
     	CollectionPhotos ph3 = new CollectionPhotos();
     	ph3.setCollection(c1);
-    	ph3.setPhoto(p1);
+    	ph3.setPhoto(p3);
     	collectionPhRepository.save(ph3);
     	
     	assertEquals(4, collectionPhRepository.findAll().size());
@@ -245,10 +265,70 @@ public class DataIntegrityTest {
     		}
     	}
     	
-    	photoRepository.delete(p0.getId());
+    	assertNull(photoRepository.findOne(p0.getId()));
+    	photoRepository.delete(p3.getId());
     	assertEquals(1, collectionPhRepository.findAll().size());
-    	assertEquals(ph3.getId(), collectionPhRepository.findAll().get(0).getId());
+    	assertEquals(ph1.getId(), collectionPhRepository.findAll().get(0).getId());
     	service.delete(u.getId());
     	assertEquals(0, collectionPhRepository.findAll().size());
+    }
+    
+
+    @Test
+    public void testDeleteCollectionIntegrity() {
+
+    	User u = new User();
+        u.setRole(Role.ADMIN);
+        u.setUsername("ndemo3001");
+        u.setPasswordHash("n$2a$10$ebyC4Z5WtCXXc.HGDc1Yoe6CLFzcntFmfse6/pTj7CeDY5I05w16C");
+        u.setEmail("ndemo3001@quantlance.com");
+        u.setPhotoUrl("http://");
+        service.save(u);
+    	
+    	Frame frame = new Frame();
+    	frame.setUrl("http://becuz.net");
+    	frame = frameRepository.save(frame);
+
+    	co.becuz.domain.Collection c = new co.becuz.domain.Collection();
+    	c.setFrame(frame);
+    	c.setHeadline("My headline");
+    	c.setUser(u);
+    	collectionRepository.save(c);
+
+    	Photo p0 = new Photo();
+    	p0.setBucket("becuz0");
+    	p0.setCaption("My caption100");
+    	p0.setMd5Digest("eeeeee100");
+    	p0.setOriginalKey("/upload/file");
+    	p0.setOwner(u);
+    	p0.setUploadedDate(new Date());
+    	photoRepository.save(p0);
+
+    	Photo p1 = new Photo();
+    	p1.setBucket("becuz2");
+    	p1.setCaption("My caption200");
+    	p1.setMd5Digest("eeeeee200");
+    	p1.setOriginalKey("/upload/file");
+    	p1.setOwner(u);
+    	p1.setUploadedDate(new Date());
+    	photoRepository.save(p1);
+    	
+    	CollectionPhotos ph = new CollectionPhotos();
+    	ph.setCollection(c);
+    	ph.setPhoto(p0);
+    	collectionPhRepository.save(ph);
+    	
+
+    	CollectionPhotos ph2 = new CollectionPhotos();
+    	ph2.setCollection(c);
+    	ph2.setPhoto(p1);
+    	collectionPhRepository.save(ph2);
+
+    	assertEquals(2, photoRepository.findAll().size());
+    	assertEquals(2, collectionPhRepository.findAll().size());
+    	collectionRepository.delete(c.getId());
+    	assertEquals(0, collectionPhRepository.findAll().size());
+    	assertEquals(0, photoRepository.findAll().size());
+
     }
 }

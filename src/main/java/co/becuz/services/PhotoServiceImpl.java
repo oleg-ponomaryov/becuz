@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import co.becuz.domain.Photo;
 import co.becuz.domain.User;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
+import co.becuz.dto.response.PhotoDeleteResponse;
 import co.becuz.dto.response.PhotoSaveResponse;
 import co.becuz.dto.response.StaticImage;
 import co.becuz.repositories.PhotoRepository;
@@ -167,6 +169,51 @@ public class PhotoServiceImpl implements PhotoService {
 	}
 
 	@Override
+	@Transactional
+	public PhotoDeleteResponse delete(java.util.Collection<Photo> photos, CurrentUser user) {
+		PhotoDeleteResponse resp = new PhotoDeleteResponse();
+		
+		Iterator<Photo> ph_it = photos.iterator();
+	    while (ph_it.hasNext()) {
+	    	String id = ph_it.next().getId();
+	    	if (StringUtils.isEmpty(id)) {
+	    		continue;
+	    	}
+	        Photo ph = photoRepository.findOne(id);
+	        if (ph==null) {
+	        	continue;
+	        }
+	        boolean can_delete = false;
+	        if (ph.getOwner().equals(user.getUser())) {
+	        	can_delete = true;
+	        }
+	        else {
+		        for (CollectionPhotos c : collectionPhotosService.getAllCollectionPhotosByPhoto(ph)) {
+		        	if (c.getCollection().getUser().equals(user.getUser())) {
+			        	can_delete = true;
+			        	break;	
+		        	}
+		        }
+	        }
+	        if (can_delete) {
+	        	try {
+	        		photoRepository.delete(ph);
+	        	}
+	        	catch (Exception e) {
+	    			resp.setStatus("ERROR");
+	    			resp.getMessages().add(String.format("Could not delete Photo/S3 object %s,%s",ph.getId(),ph.getOriginalKey()));
+	        	}
+    			resp.getMessages().add(String.format("Deleted photo with id %s",ph.getId()));
+	        }
+	    }
+		
+	    if (resp.getStatus()==null) {
+	    	resp.setStatus("SUCCESS");
+	    }
+		return resp;
+	}
+	
+	@Override
 	public PhotoDTO generateExpiringUrl(Photo photo, long expirationInMillis) {
 		Date expiration = new java.util.Date();
 		long msec = expiration.getTime();
@@ -182,6 +229,7 @@ public class PhotoServiceImpl implements PhotoService {
 		dto.setPhotoId(photo.getId());
 		dto.setMd5Digest(photo.getMd5Digest());
 		dto.setCaption(photo.getCaption());
+		dto.setOwnerId(photo.getOwner().getId());
 		URL url = s3Client
 				.generatePresignedUrl(generatePresignedUrlRequest);
 		dto.setExpiringUrl(url);

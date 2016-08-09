@@ -7,6 +7,7 @@ import java.util.List;
 import co.becuz.domain.Photo;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
+import co.becuz.dto.response.PhotoDeleteResponse;
 import co.becuz.dto.response.PhotoSaveResponse;
 import co.becuz.dto.response.StaticImage;
 
@@ -21,4 +22,5 @@ public interface PhotoService {
 			CurrentUser user) throws ParseException;
 	
 	Photo save(Photo photo);
+	PhotoDeleteResponse delete(Collection<Photo> photos, CurrentUser user);
 }

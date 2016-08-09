@@ -4,12 +4,18 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import co.becuz.configuration.SecurityConfiguration;
 import co.becuz.json.JsonDateSerializer;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -30,12 +36,12 @@ public class CollectionPhotos implements Serializable {
 	private String id;
     
 	@ManyToOne
-    @JoinColumn(name = "collection_id")	
+    @JoinColumn	
 	@Getter
 	@Setter
 	private Collection collection;
 
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.REMOVE,CascadeType.DETACH,CascadeType.MERGE,CascadeType.REFRESH})
     @JoinColumn(name = "photo_id")	
 	@Getter
 	@Setter
@@ -52,7 +58,7 @@ public class CollectionPhotos implements Serializable {
 	@Setter
 	@JsonSerialize(using=JsonDateSerializer.class)
 	private Date updated;
-		
+
 		@PrePersist
 		public void onSave() {
 			if (this.created==null) {

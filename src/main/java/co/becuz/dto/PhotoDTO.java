@@ -28,4 +28,8 @@ public class PhotoDTO implements Serializable {
 	@Getter
 	@Setter
     private String caption;
+	
+	@Getter
+	@Setter
+    private String ownerId;
 }

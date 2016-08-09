@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import co.becuz.domain.Collection;
 import co.becuz.domain.User;
+import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.repositories.CollectionRepository;
 import co.becuz.repositories.UserRepository;
 
@@ -35,7 +36,14 @@ public class CollectionServiceImpl implements CollectionService {
     }
     
     @Override
-    public void delete(String id) {
+    public void delete(String id, CurrentUser currentUser) {
+    	Collection col = getCollectionById(id);
+    	if (col == null) {
+    		throw new NoSuchElementException(String.format("Collection=%s not found", id));
+    	}
+    	if (!col.getUser().equals(currentUser.getUser())) {
+    		throw new IllegalArgumentException(String.format("Attempt to delete not own collection"));
+    	}
     	collectionRepository.delete(id);
     }
 

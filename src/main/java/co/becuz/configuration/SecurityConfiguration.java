@@ -86,6 +86,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private UserTaskService userTaskService;
 
+	private static AmazonS3 s3Client;
+	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		
@@ -107,6 +109,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/frames/all").permitAll()
 				.antMatchers("/frames/**").hasAnyAuthority("ADMIN", "USER")
 				.antMatchers(HttpMethod.GET, "/collections/{id}").permitAll()
+				.antMatchers(HttpMethod.GET, "/collections/photos/{id}").permitAll()
 				.antMatchers("/collections/**").hasAnyAuthority("ADMIN", "USER")
 				.anyRequest().fullyAuthenticated()
 				.and().formLogin()
@@ -231,10 +234,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				new SystemPropertiesCredentialsProvider());
 	}
 
+	public static AmazonS3 getS3Client() {
+		return s3Client;
+	}
+	
 	@Bean
 	public AmazonS3 s3Client(final AWSCredentialsProvider creds,
 			final Region region) {
-		return region.createClient(AmazonS3Client.class, creds, null);
+		s3Client = region.createClient(AmazonS3Client.class, creds, null); 
+		return s3Client; 
 	}
 
 	@Bean

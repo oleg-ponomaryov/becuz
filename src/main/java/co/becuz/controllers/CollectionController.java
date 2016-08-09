@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,8 +50,8 @@ public class CollectionController {
     }
     
     @RequestMapping(method=RequestMethod.DELETE, value="/collections/{id}")
-    public @ResponseBody void delete(@PathVariable String id) {
-    	collectionService.delete(id);
+    public @ResponseBody void delete(@PathVariable String id, @ModelAttribute CurrentUser currentUser) {
+    	collectionService.delete(id, currentUser);
     }
     
     @RequestMapping(method=RequestMethod.PUT, value="/collections/{id}")
@@ -70,6 +71,10 @@ public class CollectionController {
     	}
     }
     
+    @CrossOrigin( 
+    methods={RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.OPTIONS,RequestMethod.DELETE, RequestMethod.HEAD},
+    allowedHeaders={"Accept", "Content-Range", "Content-Type", "Content-Disposition","Content-Description"}, 
+    exposedHeaders={"Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "Access-Control-Max-Age"})
     @RequestMapping(method=RequestMethod.GET, value="/collections/photos/{id}")
     public @ResponseBody CollectionDTO getCollectionPhotos(@PathVariable String id) {
     	if (id==null || id.isEmpty()) {

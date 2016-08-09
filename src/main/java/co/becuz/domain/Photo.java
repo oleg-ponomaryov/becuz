@@ -3,9 +3,17 @@ package co.becuz.domain;
 import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import co.becuz.configuration.SecurityConfiguration;
 import co.becuz.json.JsonDateSerializer;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.io.Serializable;
@@ -22,7 +30,8 @@ import lombok.Setter;
 @EqualsAndHashCode(of = { "id" })
 public class Photo implements Serializable {
 	private static final long serialVersionUID = -2762093398070254170L;
-
+	private static final Logger LOG = LoggerFactory.getLogger(Photo.class);
+	
 	@Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -93,14 +102,27 @@ public class Photo implements Serializable {
 	private Set<CollectionPhotos> colectionPhotos = new HashSet<CollectionPhotos>();
 	
 	@PrePersist
-		public void onSave() {
-			if (this.created==null) {
-				this.created = new Date();
-			}
+	public void onSave() {
+		if (this.created==null) {
+			this.created = new Date();
 		}
+	}
 
-		@PreUpdate
-		public void onUpdate() {
-			this.updated = new Date();
-		}
+	@PreUpdate
+	public void onUpdate() {
+		this.updated = new Date();
+	}
+	
+	@PreRemove
+	public void onRemove() {
+    	DeleteObjectRequest del_req = new DeleteObjectRequest(this.getBucket(), this.getOriginalKey());
+    	try {
+    		SecurityConfiguration.getS3Client().deleteObject(del_req);
+    	}
+    	catch (AmazonServiceException ase) {
+			LOG.error("AmazonServiceException", ase);
+    	} catch (AmazonClientException ace) {
+			LOG.error("AmazonClientException", ace);
+    	}
+	}
 }
