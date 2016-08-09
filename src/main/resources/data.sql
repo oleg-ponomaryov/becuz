@@ -16,7 +16,6 @@ WHERE
     NOT EXISTS (
         SELECT id FROM frames WHERE id = '4684db9b-c723-4fac-93bc-a9948019f06'
     );
-  
 
 Insert into frames (id,created,child_id,description,display_type,isdefault,photo_height,photo_width,
   preview_url,priority,status,updated,url,window_url) 
@@ -28,7 +27,6 @@ WHERE
     NOT EXISTS (
         SELECT id FROM frames WHERE id = '4684db9b-c723-4fac-93bc-a9948019f0a7'
     );
-  
 
 Insert into frames (id,created,child_id,description,display_type,isdefault,photo_height,photo_width,
   preview_url,priority,status,updated,url,window_url) 
