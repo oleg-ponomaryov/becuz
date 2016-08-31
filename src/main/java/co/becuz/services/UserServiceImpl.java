@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -24,6 +25,7 @@ import co.becuz.domain.User;
 import co.becuz.domain.enums.Role;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.CreateUserDTO;
+import co.becuz.exceptions.UserExistsException;
 import co.becuz.forms.UserCreateForm;
 import co.becuz.repositories.CollectionRepository;
 import co.becuz.repositories.PhotoRepository;
@@ -141,7 +143,7 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public User createSelf(CreateUserDTO userdto)  {
+	public User createSelf(CreateUserDTO userdto) throws UserExistsException  {
 		byte[] iv;
 		try {
 			iv = userdto.getIv().getBytes("UTF-8");
@@ -160,8 +162,12 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		Collection<User> existingUsers = getUserByEmail(email);
-		if (existingUsers != null && existingUsers.size()>0) {
-        	throw new IllegalStateException(String.format("User with email %s already exists", email));
+		if (existingUsers!=null && existingUsers.size()>0) {
+			for (User u : existingUsers) {
+				if (Objects.equals(u.getSigninprovider(), userdto.getUser().getSigninprovider())) {
+					throw new UserExistsException(String.format("User with email %s and social type %s already exists", email, u.getSigninprovider()));
+				}
+			}
 		}
 
 		String password = encryptionService.decrypt(userdto.getUser().getPassword(), iv);

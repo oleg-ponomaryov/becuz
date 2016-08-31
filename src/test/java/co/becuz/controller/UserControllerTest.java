@@ -3,6 +3,7 @@ package co.becuz.controller;
 import static org.junit.Assert.*;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Date;
@@ -131,7 +132,19 @@ public class UserControllerTest {
         resp
         .then()
         .statusCode(HttpStatus.SC_OK);
+
+        
+    	dto = "{\"user\":{\"email\":\""+encryptionService.encrypt("oleg@quantlance.com", iv.getBytes("UTF-8"))+"\",\"password\":\""+encryptionService.encrypt("demo", iv.getBytes("UTF-8"))+"\"},\"appId\":\""+encryptionService.encrypt(appId, iv.getBytes("UTF-8"))+"\",\"iv\":\"1234567890123456\"}";
+
+    	LOGGER.info(dto);
     	
+        resp = RestAssured.given().contentType("application/json\r\n").with().body(dto).when().post("/user/create");
+        resp.prettyPrint();
+
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_CONFLICT);
+        
     	return;
     }
     
@@ -221,6 +234,29 @@ public class UserControllerTest {
         return;
     }
 
+    @Test
+    public void getUserByEmail() throws UnsupportedEncodingException {
+        assertEquals(repository.findAllByEmail("mary@mary.com").size(), 1);
+        User mary = repository.findAllByEmail("mary@mary.com").iterator().next();
+        assertNotNull(mary);
+        
+        RestAssured.authentication = RestAssured.form("oleg@oleg.com", "123", new FormAuthConfig("/login", "email", "password"));
+
+        Response resp = RestAssured.given().contentType("application/json\r\n").with().when().get("/user/email/"+URLEncoder.encode(mary.getEmail(), "UTF-8"));
+        resp.prettyPrint();
+        
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_OK)
+        .body("username", Matchers.is("mary"))
+        .body("email", Matchers.is("mary@mary.com"));
+
+        RestAssured.authentication = RestAssured.form("demo@quantlance.com", "demo", new FormAuthConfig("/login", "email", "password"));
+
+        return;
+    }
+
+    
     @Test
     public void swapUsers() {
     	

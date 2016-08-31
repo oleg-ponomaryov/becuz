@@ -1,5 +1,7 @@
 package co.becuz.controllers;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -29,6 +31,7 @@ import co.becuz.domain.User;
 import co.becuz.domain.enums.Role;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.CreateUserDTO;
+import co.becuz.exceptions.UserExistsException;
 import co.becuz.forms.UserCreateForm;
 import co.becuz.services.UserService;
 import co.becuz.validators.UserCreateFormValidator;
@@ -63,25 +66,6 @@ public class UserController {
     	else {
     		throw new NoSuchElementException(String.format("User=%s not found", id));
     	}
-    }
-    
-    @RequestMapping("user/edit/{id}")
-    public String edit(@PathVariable String id, Model model){
-    	User user = userService.getUserById(id);
-    	if (user == null) {
-    		throw new NoSuchElementException(String.format("User=%s not found", id));
-    	}
-    	
-    	UserCreateForm form = new UserCreateForm();
-    	form.setAction("update");
-    	form.setId(user.getId());
-    	form.setEmail(user.getEmail());
-    	form.setPassword("");
-    	form.setPasswordRepeated("");
-    	form.setRole(user.getRole());
-    	
-        model.addAttribute("form", form);
-        return "user_create";
     }
     
     @RequestMapping("/users/all")
@@ -143,6 +127,20 @@ public class UserController {
     		throw new NoSuchElementException(String.format("User=%s not found", id));
     	}
     }
+
+    @RequestMapping(method=RequestMethod.GET, value="/user/email/{email_encoded:.+}")
+    public @ResponseBody User getUserByEmail(@PathVariable String email_encoded) throws UnsupportedEncodingException {
+    	
+		String	email = URLDecoder.decode(email_encoded, "UTF-8");
+    	
+    	Collection<User> users = userService.getUserByEmail(email);
+    	if (users != null && !users.isEmpty()) {
+    		return users.iterator().next();
+    	}
+    	else {
+    		throw new NoSuchElementException(String.format("User=%s not found", email));
+    	}
+    }
     
     @RequestMapping(method=RequestMethod.GET, value="/time")
     public @ResponseBody String getCurrentTime() {
@@ -161,10 +159,11 @@ public class UserController {
     				StringUtils.isEmpty(iv) || StringUtils.isEmpty(user.getPassword())) {
     			throw new NoSuchElementException ("Bad request");	
     		}
-    		
     		return  userService.createSelf(userdto);
-    		
      	}
+    	catch (UserExistsException e1) {
+    		response.setStatus(HttpServletResponse.SC_CONFLICT);
+    	}
     	catch (Exception e) {
     		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     	}
