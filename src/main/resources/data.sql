@@ -50,6 +50,22 @@ WHERE
     NOT EXISTS (
         SELECT id FROM frames WHERE id = '4684db9b-c723-4fac-93bc-a9948019f09'
     );
+    
+Insert into frames (id,created,child_id,description,display_type,isdefault,photo_height,photo_width,
+  preview_url,priority,status,updated,url,window_url) 
+  SELECT '4684db9b-c723-4fac-93bc-a9948019f0a','2016-07-06 04:46:56.733',null,  
+  null,null,'false',0,0,'http://my.becuz.co/preview-frames/instant.jpg',
+  0,0,null,'http://my.becuz.co/frames/instant/index.html',
+  'http://my.becuz.co/photo-windows/instant_window.png'
+WHERE
+    NOT EXISTS (
+        SELECT id FROM frames WHERE id = '4684db9b-c723-4fac-93bc-a9948019f0a'
+    );
+    
+    update frames set preview_url = 'http://my.becuz.co/preview-frames/instant.jpg',
+    						  url ='http://my.becuz.co/frames/instant/index.html',
+    					window_url ='http://my.becuz.co/photo-windows/instant_window.png'
+    where id = '4684db9b-c723-4fac-93bc-a9948019f0a';
 
 	update frames set preview_url = 'http://my.becuz.co/preview-frames/sub.jpg',
     						  url ='http://my.becuz.co/frames/sub/index.html',
