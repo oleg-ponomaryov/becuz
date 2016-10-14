@@ -3,6 +3,7 @@ package co.becuz.dto;
 import java.io.Serializable;
 import java.net.URL;
 
+import co.becuz.domain.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +12,7 @@ public class PhotoDTO implements Serializable {
 
 	@Getter
 	@Setter
-	private String photoId;
+	private String id;
 	
 	@Getter
 	@Setter
@@ -28,8 +29,8 @@ public class PhotoDTO implements Serializable {
 	@Getter
 	@Setter
     private String caption;
-	
+
 	@Getter
 	@Setter
-    private String ownerId;
+    private User owner;
 }

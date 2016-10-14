@@ -1,5 +1,6 @@
 package co.becuz.services;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -7,6 +8,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,7 +28,6 @@ import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
 import co.becuz.dto.response.PhotoDeleteResponse;
 import co.becuz.dto.response.PhotoSaveResponse;
-import co.becuz.dto.response.StaticImage;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.repositories.UserRepository;
 
@@ -78,32 +81,45 @@ public class PhotoServiceImpl implements PhotoService {
 	}
 
 	@Override
-	public List<StaticImage> getStaticImages(String bucket, String prefix) {
+	public List<PhotoDTO> getStaticImages(String bucket, String prefix) {
 		
-		List<StaticImage> ret = new ArrayList<>();
+		List<PhotoDTO> ret = new ArrayList<>();
 		String baseUrl = commonService.getS3BucketUrl();
-		String metadataKey = config.getProperty("initialMetadataKey");
+		String captionMmetadataKey = config.getProperty("captionMmetadataKey");
+		String userMmetadataKey = config.getProperty("userMmetadataKey");
 		
 		final ListObjectsRequest req = new ListObjectsRequest().withBucketName(bucket).withPrefix(prefix);
 		final ObjectListing objectListing = s3Client.listObjects(req);
-		for(S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+		List<S3ObjectSummary> s3list = objectListing.getObjectSummaries();
+		shuffleList(s3list);
+		for(S3ObjectSummary objectSummary : s3list) {
 			if (objectSummary.getKey().endsWith("/")) {
 				continue;
 			}
 			
-			StaticImage st = new StaticImage();
-			st.setUrl(baseUrl+objectSummary.getKey());
-			st.setInitial(false);
-			st.setMd5(objectSummary.getETag());
-			
-			LOG.debug("Key:{}", objectSummary.getKey());
+			PhotoDTO st = new PhotoDTO();
+			try {
+				st.setExpiringUrl(new URL(baseUrl+objectSummary.getKey()));
+			} catch (MalformedURLException e) {
+				LOG.error("Could not parse URL:"+baseUrl+objectSummary.getKey());
+			}
+			st.setMd5Digest(objectSummary.getETag());
 			
 			ObjectMetadata objectMetadata = s3Client.getObjectMetadata(bucket, objectSummary.getKey());
             Map<String, String> userMetadataMap = objectMetadata.getUserMetadata();
             
-            if (userMetadataMap!=null && userMetadataMap.get(metadataKey) != null && userMetadataMap.get(metadataKey).equals("true")) {
-            	st.setInitial(true);
-            }
+            //for (Entry<String, String> e : userMetadataMap.entrySet()) {
+    		//	LOG.debug(e.getKey()+"->"+e.getValue());
+            //}
+            
+			st.setCaption(userMetadataMap.get(captionMmetadataKey));
+			if (userMetadataMap.get(userMmetadataKey)!=null) {
+				String[] uarr = userMetadataMap.get(userMmetadataKey).split(" ");
+				User u = new User();
+				u.setFirstname(uarr[0]);
+				u.setLastname(uarr[1]);
+				st.setOwner(u);
+			}
 			
 			ret.add(st);
 		}
@@ -170,10 +186,10 @@ public class PhotoServiceImpl implements PhotoService {
 
 	@Override
 	@Transactional
-	public PhotoDeleteResponse delete(java.util.Collection<Photo> photos, CurrentUser user) {
+	public PhotoDeleteResponse delete(java.util.Collection<PhotoDTO> photos, CurrentUser user) {
 		PhotoDeleteResponse resp = new PhotoDeleteResponse();
 		
-		Iterator<Photo> ph_it = photos.iterator();
+		Iterator<PhotoDTO> ph_it = photos.iterator();
 	    while (ph_it.hasNext()) {
 	    	String id = ph_it.next().getId();
 	    	if (StringUtils.isEmpty(id)) {
@@ -198,12 +214,12 @@ public class PhotoServiceImpl implements PhotoService {
 	        if (can_delete) {
 	        	try {
 	        		photoRepository.delete(ph);
+	    			resp.getMessages().add(String.format("Deleted photo with id %s",ph.getId()));
 	        	}
 	        	catch (Exception e) {
 	    			resp.setStatus("ERROR");
 	    			resp.getMessages().add(String.format("Could not delete Photo/S3 object %s,%s",ph.getId(),ph.getOriginalKey()));
 	        	}
-    			resp.getMessages().add(String.format("Deleted photo with id %s",ph.getId()));
 	        }
 	    }
 		
@@ -226,10 +242,10 @@ public class PhotoServiceImpl implements PhotoService {
 		generatePresignedUrlRequest.setMethod(HttpMethod.GET);
 		generatePresignedUrlRequest.setExpiration(expiration);
 		PhotoDTO dto = new PhotoDTO();
-		dto.setPhotoId(photo.getId());
+		dto.setId(photo.getId());
 		dto.setMd5Digest(photo.getMd5Digest());
 		dto.setCaption(photo.getCaption());
-		dto.setOwnerId(photo.getOwner().getId());
+		dto.setOwner(photo.getOwner());
 		URL url = s3Client
 				.generatePresignedUrl(generatePresignedUrlRequest);
 		dto.setExpiringUrl(url);
@@ -262,4 +278,40 @@ public class PhotoServiceImpl implements PhotoService {
 	public Photo save(Photo photo) {
 	       return photoRepository.save(photo);
 	}
+
+	@Override
+	public Photo update(PhotoDTO photo) {
+		if (photo==null || photo.getId()==null) {
+    		throw new NoSuchElementException("Photo not found");
+		}
+    	Photo ph = photoRepository.findOne(photo.getId());
+    	if (ph == null) {
+    		throw new NoSuchElementException(String.format("Photo=%s not found", photo.getId()));
+    	}
+
+    	if (photo.getCaption()!=null)
+    		ph.setCaption(photo.getCaption());
+    	
+    	if (photo.getMd5Digest()!=null)
+    		ph.setMd5Digest(photo.getMd5Digest());
+
+    	if (photo.getOwner()!=null)
+    		ph.setOwner(photo.getOwner());
+		
+	       return photoRepository.save(ph);
+	}
+	
+	private void shuffleList(List<S3ObjectSummary> list)
+	  {
+	    // If running on Java 6 or older, use `new Random()` on RHS here
+	    Random rnd = ThreadLocalRandom.current();
+	    for (int i = list.size() - 1; i > 0; i--)
+	    {
+	      int index = rnd.nextInt(i + 1);
+	      // Simple swap
+	      S3ObjectSummary a = list.get(index);
+	      list.set(index, list.get(i));
+	      list.set(i, a);
+	    }
+	  }
 }

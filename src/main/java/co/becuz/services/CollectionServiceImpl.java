@@ -64,6 +64,9 @@ public class CollectionServiceImpl implements CollectionService {
     	
     	if (collection.getOwnerType()!=null)
     		col.setOwnerType(collection.getOwnerType());
+
+    	if (collection.getStatus()!=null)
+    		col.setStatus(collection.getStatus());
     	
         return collectionRepository.save(col);
     }

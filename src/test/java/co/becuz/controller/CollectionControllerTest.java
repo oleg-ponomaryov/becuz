@@ -24,6 +24,7 @@ import co.becuz.SpringBootWebApplication;
 import co.becuz.domain.Collection;
 import co.becuz.domain.Frame;
 import co.becuz.domain.User;
+import co.becuz.domain.enums.CollectionStatus;
 import co.becuz.domain.enums.FrameOwner;
 import co.becuz.repositories.CollectionRepository;
 import co.becuz.repositories.FrameRepository;
@@ -120,6 +121,7 @@ public class CollectionControllerTest {
     	
         Collection col  = collectionRepository.findOne(collection.getId());
         col.setHeadline("My new headline");
+        col.setStatus(CollectionStatus.SHARED);
 
         Response resp = RestAssured.given().contentType("application/json\r\n").with().body(col).when().put("/collections/"+col.getId());
         resp.prettyPrint();
@@ -127,11 +129,9 @@ public class CollectionControllerTest {
         resp
         .then()
         .statusCode(HttpStatus.SC_OK)
-        .body("headline", Matchers.is("My new headline"));
+        .body("headline", Matchers.is("My new headline"))
+        .body("status", Matchers.is(CollectionStatus.SHARED.name()));
         //.body("email", Matchers.is("greatjohn@john.com"));
-
-        //assertEquals(repository.findAllByEmail("greatjohn@john.com").size(),1);
-        
         return;
     }
 }

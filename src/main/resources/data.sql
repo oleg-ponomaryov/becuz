@@ -120,3 +120,24 @@ WHERE
     						  url ='http://my.becuz.co/frames/zep/index.html',
     					window_url ='http://my.becuz.co/photo-windows/zep_window.png'
     where id = '4684db9b-c723-4fac-93bc-a9948019f06';					
+
+    update frames set priority = 5
+    where id = '4684db9b-c723-4fac-93bc-a9948019f2b';
+
+    update frames set priority = 2
+    where id = '4684db9b-c723-4fac-93bc-a9948019f1b';
+
+    update frames set priority = 7
+    where id = '4684db9b-c723-4fac-93bc-a9948019f0a';
+
+    update frames set priority = 3
+    where id = '4684db9b-c723-4fac-93bc-a9948019f09';
+
+    update frames set priority = 1
+    where id = '4684db9b-c723-4fac-93bc-a9948019f0a8';
+
+    update frames set priority = 4
+    where id = '4684db9b-c723-4fac-93bc-a9948019f0a7';
+
+    update frames set priority = 6
+    where id = '4684db9b-c723-4fac-93bc-a9948019f06';

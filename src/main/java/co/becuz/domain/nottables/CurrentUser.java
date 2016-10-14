@@ -21,7 +21,7 @@ public class CurrentUser extends
 	}
 
 	public CurrentUser(User user) {
-		super(user.getEmail(), user.getPasswordHash(), AuthorityUtils
+		super(user.getEmail(), (user.getPasswordHash()==null) ? user.getSocialPasswordHash() : user.getPasswordHash(), AuthorityUtils
 				.createAuthorityList(user.getRole().toString()));
 		this.user = user;
 	}

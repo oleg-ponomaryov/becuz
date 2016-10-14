@@ -31,6 +31,7 @@ import lombok.Setter;
 public class Photo implements Serializable {
 	private static final long serialVersionUID = -2762093398070254170L;
 	private static final Logger LOG = LoggerFactory.getLogger(Photo.class);
+	public static final long EXP_TIME_MILLIS = 31556952000L;
 	
 	@Id
     @GeneratedValue(generator = "uuid")

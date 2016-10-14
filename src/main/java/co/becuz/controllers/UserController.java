@@ -18,8 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,28 +30,24 @@ import co.becuz.domain.enums.Role;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.CreateUserDTO;
 import co.becuz.exceptions.UserExistsException;
-import co.becuz.forms.UserCreateForm;
 import co.becuz.services.UserService;
-import co.becuz.validators.UserCreateFormValidator;
 
 @Controller
 public class UserController {
 
     private final UserService userService;
-    private final UserCreateFormValidator userCreateFormValidator;
     private static final Logger log = LoggerFactory
 			.getLogger(UserController.class);
     
     @Autowired
-    public UserController(UserService userService, UserCreateFormValidator userCreateFormValidator) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userCreateFormValidator = userCreateFormValidator;
     }
 
-    @InitBinder("form")
-    public void initBinder(WebDataBinder binder) {
-        binder.addValidators(userCreateFormValidator);
-    }
+   // @InitBinder("form")
+   // public void initBinder(WebDataBinder binder) {
+   //     binder.addValidators(userCreateFormValidator);
+   // }
 
     @RequestMapping("/user/{id}")
     public String getUserPage(@PathVariable String id, Model model) {
@@ -159,7 +153,13 @@ public class UserController {
     				StringUtils.isEmpty(iv) || StringUtils.isEmpty(user.getPassword())) {
     			throw new NoSuchElementException ("Bad request");	
     		}
-    		return  userService.createSelf(userdto);
+        	Map<User, Boolean> map = userService.createSelf(userdto);
+        	
+        	User u = map.keySet().iterator().next();
+        	if (map.values().iterator().next()) {
+        		response.setStatus(HttpServletResponse.SC_CONFLICT);
+        	}
+    		return  u;
      	}
     	catch (UserExistsException e1) {
     		response.setStatus(HttpServletResponse.SC_CONFLICT);

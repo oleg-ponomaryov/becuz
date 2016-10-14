@@ -1,5 +1,9 @@
 package co.becuz.controller;
 
+import java.sql.Date;
+
+import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,8 +18,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import co.becuz.SpringBootWebApplication;
 import co.becuz.domain.Collection;
 import co.becuz.domain.Frame;
+import co.becuz.domain.Photo;
 import co.becuz.domain.User;
 import co.becuz.domain.enums.Role;
+import co.becuz.dto.PhotoDTO;
 import co.becuz.dto.PhotoUploadRequestDTO;
 import co.becuz.repositories.FrameRepository;
 import co.becuz.repositories.PhotoRepository;
@@ -62,15 +68,6 @@ public class PhotoControllerTest {
     		return;
     	}
 
-    	//demo = new User();
-        //demo.setRole(Role.ADMIN);
-        //demo.setUsername("demo");
-        //demo.setPasswordHash("$2a$10$ebyC4Z5WtCXXc.HGDc1Yoe6CLFzcntFmfse6/pTj7CeDY5I05w16C");
-        //demo.setEmail("demo@quantlance.com");
-        //demo.setPhotoUrl("http://");
-    	
-        //repository.save(Arrays.asList(demo));
-
         ndemo = new User();
         ndemo.setRole(Role.ADMIN);
         ndemo.setUsername("ndemo");
@@ -115,5 +112,43 @@ public class PhotoControllerTest {
         resp.prettyPrint();
         
        return;
+    }
+    
+    @Test
+    public void updatePhoto() {
+
+    	User u = new User();
+        u.setRole(Role.ADMIN);
+        u.setUsername("ndemo100");
+        u.setPasswordHash("n$2a$10$ebyC4Z5WtCXXc.HGDc1Yoe6CLFzcntFmfse6/pTj7CeDY5I05w16C");
+        u.setEmail("ndemo100001@quantlance.com");
+        u.setPhotoUrl("http://");
+        service.save(u);
+    	
+    	Photo ph = new Photo();
+    	ph.setBucket("bucket");
+    	ph.setCaption("My caption");
+    	ph.setDescription("My Descr");
+    	ph.setMd5Digest("12345");
+    	ph.setOwner(u);
+    	ph.setOriginalKey("/upload/file");
+    	ph.setUploadedDate(new Date(20000L));
+    	photoService.save(ph);
+    	
+    	PhotoDTO phd = new PhotoDTO();
+    	phd.setCaption("My new caption");
+    	phd.setMd5Digest("54321");
+    	phd.setOwner(ndemo);
+    	phd.setId(ph.getId());
+    	
+        Response resp = RestAssured.given().contentType("application/json\r\n").with().body(phd).when().put("/photo/"+phd.getId());
+        resp.prettyPrint();
+        
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_OK)
+        .body("caption", Matchers.is("My new caption"))
+        .body("md5Digest", Matchers.is("54321"));
+        return;
     }
 }
