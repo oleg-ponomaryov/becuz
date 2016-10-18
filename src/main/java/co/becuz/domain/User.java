@@ -56,12 +56,18 @@ public class User implements Serializable {
 	@Transient
 	private String password;
 	
-	@Column(name = "password_hash", nullable = false)
+	@Column(name = "password_hash", nullable = true)
 	@Getter
 	@Setter
 	@JsonIgnore
 	private String passwordHash;
 
+	@Column(name = "social_password_hash", nullable = true)
+	@Getter
+	@Setter
+	@JsonIgnore
+	private String socialPasswordHash;
+	
 	@Column(name = "role", nullable = false)
 	@Enumerated(EnumType.STRING)
 	@Getter

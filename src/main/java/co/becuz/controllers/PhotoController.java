@@ -9,7 +9,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +24,6 @@ import co.becuz.domain.Collection;
 import co.becuz.domain.Frame;
 import co.becuz.domain.Photo;
 import co.becuz.domain.User;
-import co.becuz.domain.enums.Role;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
 import co.becuz.dto.PhotoUploadRequestDTO;
@@ -69,31 +67,8 @@ public class PhotoController {
 	private CommonService commonService;
 
 	@RequestMapping(value = "/photos", method = RequestMethod.GET)
-	public String photos(ModelMap model,@ModelAttribute CurrentUser currentUser) {
-		if (currentUser.getRole()==Role.ADMIN) {
-			model.addAttribute("photos", photoService.listAllPhotos());
-		}
-		else {
-			model.addAttribute("photos", photoService.listAllPhotosForUser(currentUser.getId()));
-		}
-		return "photos";
-	}
-
-	@RequestMapping(value = "/photo/{photoId}", method = RequestMethod.GET)
-	public String imageGet(ModelMap model, @PathVariable String photoId,
-			@RequestParam(value = "delete", required = false) String delete, @ModelAttribute CurrentUser currentUser) {
-		Photo photo = photoRepository.getOne(photoId);
-		PhotoDTO dto = new PhotoDTO();
-		if (delete != null) {
-			photoRepository.delete(photo);
-			return photos(model, currentUser);
-		} else {
-			dto = photoService.generateExpiringUrl(photo, 500000);
-			model.addAttribute("photo", photo);
-			model.addAttribute("dto", dto);
-			model.addAttribute("templateName", "photo_edit");
-			return "photo_edit";
-		}
+	public @ResponseBody java.util.Collection<Photo> photos(@ModelAttribute CurrentUser currentUser) {
+		return photoService.listAllPhotosForUser(currentUser.getId());
 	}
 	
 	@RequestMapping(value = "/photo/insert/{photoId}", method = RequestMethod.POST)
@@ -102,24 +77,6 @@ public class PhotoController {
 			RedirectAttributes attr, HttpSession session) {
 		photoRepository.save(photo);
 		return "redirect:/";
-	}
-
-	@RequestMapping(value = "/photo/add", method = RequestMethod.GET)
-	public String  imageAdd(ModelMap model, HttpServletRequest request,
-			@ModelAttribute CurrentUser currentUser) {
-		// Photo redirect URL
-		String redirectUrl = request.getScheme() + "://"
-				+ request.getServerName() + ":" + request.getServerPort()
-				+ request.getContextPath() + "/photo/ingest";
-		// Prepare S3 form upload
-		PhotoUploadFormSigner formSigner = new PhotoUploadFormSigner(
-				config.getProperty("S3_UPLOAD_BUCKET"),
-				config.getProperty("S3_UPLOAD_PREFIX"), currentUser, config,
-				redirectUrl, commonService);
-		
-		model.addAttribute("formSigner", formSigner);
-		model.addAttribute("templateName", "photo_upload");
-		return "photo_upload";
 	}
 
 	@RequestMapping(value = "/photo/upload", method = RequestMethod.POST)
@@ -162,7 +119,7 @@ public class PhotoController {
 	}
 
 	@RequestMapping(value = "/photo/delete", method = RequestMethod.POST)
-	public @ResponseBody PhotoDeleteResponse deletePhotos(@RequestBody List<Photo> photos,
+	public @ResponseBody PhotoDeleteResponse deletePhotos(@RequestBody List<PhotoDTO> photos,
 			@ModelAttribute CurrentUser currentUser) {
 		return photoService.delete(photos, currentUser) ;
 	}
@@ -183,8 +140,18 @@ public class PhotoController {
 		Photo photo = photoRepository.getOne(photoId);
 		PhotoDTO dto = new PhotoDTO();
 		if (photo != null) {
-			dto = photoService.generateExpiringUrl(photo, 500000);
+			dto = photoService.generateExpiringUrl(photo, Photo.EXP_TIME_MILLIS);
 		}
 		return dto;
 	}
+	
+    @RequestMapping(method=RequestMethod.PUT, value="/photo/{id}")
+    public @ResponseBody PhotoDTO update(@PathVariable String id, @RequestBody PhotoDTO photo) {
+      Photo p = photoService.update(photo);
+      photo.setCaption(p.getCaption());
+      photo.setMd5Digest(p.getMd5Digest());
+      photo.setOwner(p.getOwner());
+      photo.setId(p.getId());
+      return photo;
+    }
 }

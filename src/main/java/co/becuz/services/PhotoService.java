@@ -9,7 +9,6 @@ import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.PhotoDTO;
 import co.becuz.dto.response.PhotoDeleteResponse;
 import co.becuz.dto.response.PhotoSaveResponse;
-import co.becuz.dto.response.StaticImage;
 
 public interface PhotoService {
 
@@ -17,10 +16,11 @@ public interface PhotoService {
 	List<PhotoDTO> generateExpiringUrls(List<Photo> photos, long expirationInMillis);
 	Collection<Photo> listAllPhotos();
 	Collection<Photo> listAllPhotosForUser(String Id);
-	List<StaticImage> getStaticImages(String bucket, String prefix);
+	List<PhotoDTO> getStaticImages(String bucket, String prefix);
 	PhotoSaveResponse save(String bucket, String photoKey, String collectionId,
 			CurrentUser user) throws ParseException;
 	
 	Photo save(Photo photo);
-	PhotoDeleteResponse delete(Collection<Photo> photos, CurrentUser user);
+	PhotoDeleteResponse delete(Collection<PhotoDTO> photos, CurrentUser user);
+	Photo update(PhotoDTO photo);
 }

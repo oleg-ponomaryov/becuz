@@ -39,6 +39,7 @@ import co.becuz.repositories.FrameRepository;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.repositories.UserRepository;
 import co.becuz.services.EncryptionService;
+import co.becuz.social.SocialMediaTypes;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.authentication.FormAuthConfig;
@@ -70,6 +71,8 @@ public class UserControllerTest {
     User oleg;
     User mary;
     User demo;
+    User social;
+    
 
     @Value("${local.server.port}")
     private int port;
@@ -111,7 +114,15 @@ public class UserControllerTest {
         mary.setEmail("mary@mary.com");
         mary.setPhotoUrl("http://");
 
-        repository.save(Arrays.asList(john, oleg, mary));
+        social = new User();
+        social.setRole(Role.USER);
+        social.setUsername("social");
+        social.setSocialPasswordHash(new BCryptPasswordEncoder().encode("1234"));
+        social.setEmail("social@facebook.com");
+        social.setPhotoUrl("http://");
+        social.setSigninprovider(SocialMediaTypes.FACEBOOK);
+        
+        repository.save(Arrays.asList(john, oleg, mary, social));
 
         RestAssured.port = port;
         RestAssured.authentication = RestAssured.form("demo@quantlance.com", "demo", new FormAuthConfig("/login", "email", "password"));
@@ -133,7 +144,6 @@ public class UserControllerTest {
         .then()
         .statusCode(HttpStatus.SC_OK);
 
-        
     	dto = "{\"user\":{\"email\":\""+encryptionService.encrypt("oleg@quantlance.com", iv.getBytes("UTF-8"))+"\",\"password\":\""+encryptionService.encrypt("demo", iv.getBytes("UTF-8"))+"\"},\"appId\":\""+encryptionService.encrypt(appId, iv.getBytes("UTF-8"))+"\",\"iv\":\"1234567890123456\"}";
 
     	LOGGER.info(dto);
@@ -141,6 +151,30 @@ public class UserControllerTest {
         resp = RestAssured.given().contentType("application/json\r\n").with().body(dto).when().post("/user/create");
         resp.prettyPrint();
 
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_CONFLICT);
+        
+    	String dto1 = "{\"user\":{\"email\":\""+encryptionService.encrypt("oleg1@quantlance.com", iv.getBytes("UTF-8"))+"\",\"password\":\""+encryptionService.encrypt("demo1", iv.getBytes("UTF-8"))+"\"},\"appId\":\""+encryptionService.encrypt(appId, iv.getBytes("UTF-8"))+"\",\"iv\":\"1234567890123456\"}";
+        resp = RestAssured.given().contentType("application/json\r\n").with().body(dto1).when().post("/user/create");
+        resp.prettyPrint();
+        
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_OK);
+        
+    	dto1 = "{\"user\":{\"email\":\""+encryptionService.encrypt("oleg1@quantlance.com", iv.getBytes("UTF-8"))+"\", \"password\":\""+encryptionService.encrypt("demo3", iv.getBytes("UTF-8"))+"\"},\"appId\":\""+encryptionService.encrypt(appId, iv.getBytes("UTF-8"))+"\",\"iv\":\"1234567890123456\"}";
+        resp = RestAssured.given().contentType("application/json\r\n").with().body(dto1).when().post("/user/create");
+        resp.prettyPrint();
+        
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_CONFLICT);
+        
+    	dto1 = "{\"user\":{\"email\":\""+encryptionService.encrypt("oleg1@quantlance.com", iv.getBytes("UTF-8"))+"\",\"signinprovider\":\"FACEBOOK\", \"password\":\""+encryptionService.encrypt("demo2", iv.getBytes("UTF-8"))+"\"},\"appId\":\""+encryptionService.encrypt(appId, iv.getBytes("UTF-8"))+"\",\"iv\":\"1234567890123456\"}";
+        resp = RestAssured.given().contentType("application/json\r\n").with().body(dto1).when().post("/user/create");
+        resp.prettyPrint();
+        
         resp
         .then()
         .statusCode(HttpStatus.SC_CONFLICT);
@@ -338,6 +372,25 @@ public class UserControllerTest {
 
         return;
     }
+    
+    @Test
+    public void testSocial() throws UnsupportedEncodingException {
+        assertEquals(repository.findAllByEmail("social@facebook.com").size(), 1);
+        User social = repository.findAllByEmail("social@facebook.com").iterator().next();
+        assertNotNull(social);
+    	
+        RestAssured.authentication = RestAssured.form("social@facebook.com", "1234", new FormAuthConfig("/login", "email", "password"));
+        Response resp = RestAssured.given().contentType("application/json\r\n").with().when().get("/user/email/"+URLEncoder.encode(social.getEmail(), "UTF-8"));
+        resp.prettyPrint();
+        
+        resp
+        .then()
+        .statusCode(HttpStatus.SC_OK)
+        .body("username", Matchers.is("social"))
+        .body("email", Matchers.is("social@facebook.com"));
+        
+        RestAssured.authentication = RestAssured.form("demo@quantlance.com", "demo", new FormAuthConfig("/login", "email", "password"));
+    }	
     
     @Test
     public void getTime() {

@@ -64,7 +64,7 @@ public class CollectionPhotosServiceImpl implements CollectionPhotosService {
 
 		for (CollectionPhotos c : collectionPhotos) {
 			Photo p = c.getPhoto();
-			PhotoDTO d = photoService.generateExpiringUrl(p, 50000);
+			PhotoDTO d = photoService.generateExpiringUrl(p, Photo.EXP_TIME_MILLIS);
 			photos.add(d);
 		}
 

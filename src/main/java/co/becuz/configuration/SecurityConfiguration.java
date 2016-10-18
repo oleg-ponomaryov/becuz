@@ -94,7 +94,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.addFilterAfter(expiredSessionFilter(),
 				SessionManagementFilter.class)
 				.authorizeRequests().antMatchers("/").permitAll()
-				.antMatchers("/startup/photos/**").permitAll()
+				.antMatchers("/stockphotos/**").permitAll()
 				.antMatchers("/time/**").permitAll()
 				.antMatchers("/css/**").permitAll()
 				.antMatchers("/login/**").permitAll()
@@ -131,8 +131,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(userDetailsService).passwordEncoder(
-				new BCryptPasswordEncoder());
+		//auth.userDetailsService(userDetailsService).passwordEncoder(
+		//		new BCryptPasswordEncoder());
+		auth.authenticationProvider(customAuthProvider());
 	}
 
 	
@@ -252,6 +253,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.getProperty("AWS_REGION")));
 	}
 	
+	@Bean
+	public CustomAuthenticationProvider customAuthProvider() {
+		CustomAuthenticationProvider provider = new CustomAuthenticationProvider();
+	    provider.setPasswordEncoder(new BCryptPasswordEncoder());
+	    provider.setUserDetailsService(userDetailsService);
+	    return provider;
+	}
 	
 	@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
 	public Facebook facebook(ConnectionRepository repo) {

@@ -26,7 +26,6 @@ import co.becuz.domain.enums.Role;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.CreateUserDTO;
 import co.becuz.exceptions.UserExistsException;
-import co.becuz.forms.UserCreateForm;
 import co.becuz.repositories.CollectionRepository;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.repositories.UserRepository;
@@ -66,33 +65,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll(new Sort("email"));
     }
 
-    @Override
-    public User create(UserCreateForm form) {
-    	Collection<User> users = getUserByEmail(form.getEmail());
-        if (users == null || users.size()==0) {
-	    	User user = new User();
-	        user.setEmail(form.getEmail());
-	        user.setPasswordHash(new BCryptPasswordEncoder().encode(form.getPassword()));
-	        user.setRole(form.getRole());
-	        return userRepository.save(user);
-        }
-        else {
-        	return users.iterator().next();
-        }
-    }
-    
-    @Override
-    public User update(UserCreateForm form) {
-    	User user = getUserById(form.getId());
-    	if (user == null) {
-    		throw new NoSuchElementException(String.format("User=%s not found", form.getId()));
-    	}
-
-        user.setEmail(form.getEmail());
-        user.setPasswordHash(new BCryptPasswordEncoder().encode(form.getPassword()));
-        user.setRole(form.getRole());
-        return userRepository.save(user);
-    }
     
     @Override
     @Transactional
@@ -138,12 +110,15 @@ public class UserServiceImpl implements UserService {
         
     	if (user.getPassword()!=null)
     		us.setPasswordHash(new BCryptPasswordEncoder().encode(user.getPassword()));
+    
+    	if (user.getSocialPasswordHash()!=null)
+    		us.setSocialPasswordHash(new BCryptPasswordEncoder().encode(user.getSocialPasswordHash()));
     	
         return userRepository.save(us);
     }
 
 	@Override
-	public User createSelf(CreateUserDTO userdto) throws UserExistsException  {
+	public Map<User, Boolean> createSelf(CreateUserDTO userdto) throws UserExistsException  {
 		byte[] iv;
 		try {
 			iv = userdto.getIv().getBytes("UTF-8");
@@ -161,13 +136,20 @@ public class UserServiceImpl implements UserService {
         	throw new IllegalStateException("Email format is not valid");
 		}
 		
+		User user=null;
+		Boolean existing = false;
 		Collection<User> existingUsers = getUserByEmail(email);
 		if (existingUsers!=null && existingUsers.size()>0) {
 			for (User u : existingUsers) {
-				if (Objects.equals(u.getSigninprovider(), userdto.getUser().getSigninprovider())) {
-					throw new UserExistsException(String.format("User with email %s and social type %s already exists", email, u.getSigninprovider()));
+				if (u.getPasswordHash()==null && userdto.getUser().getSigninprovider()==null) {
+					throw new UserExistsException(String.format("User with email %s already exists", email));
 				}
+				user = u;
+				existing = true;
 			}
+		}
+		else {
+	    	user = new User();
 		}
 
 		String password = encryptionService.decrypt(userdto.getUser().getPassword(), iv);
@@ -175,7 +157,6 @@ public class UserServiceImpl implements UserService {
         	throw new IllegalStateException("Password is not valid");
 		}
 		
-    	User user = new User();
     	User udto = userdto.getUser();
 
     	if (udto.getDob() != null)
@@ -190,17 +171,26 @@ public class UserServiceImpl implements UserService {
     	if (udto.getPhotoUrl() != null)
     		user.setPhotoUrl(udto.getPhotoUrl());
     	
-    	if (udto.getRole()!=null)
-    		user.setRole(udto.getRole());
-    		
-    	if (udto.getSigninprovider()!=null)
+    	boolean social = false;
+    	user.setSigninprovider(null);
+    	if (udto.getSigninprovider()!=null) {
     		user.setSigninprovider(udto.getSigninprovider());
+    		social = true;
+    	}	
     		
     	if (udto.getUsername()!=null)
     		user.setUsername(udto.getUsername());
     	
-    	if (password!=null)
-    		user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
+    	// 1. We update password for new user regardless
+    	// 2. We update password for existing user if current request is a 'signed up'
+    	if (password!=null) {
+	    	if (!social && user.getPasswordHash()==null) {
+	    		user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
+	    	}
+	    	else if (social){
+	    		user.setSocialPasswordHash(new BCryptPasswordEncoder().encode(password));
+	    	}
+    	}
 
     	user.setRole(Role.USER);
     	user.setEmail(email);
@@ -211,7 +201,10 @@ public class UserServiceImpl implements UserService {
 		SecurityContextHolder.clearContext();
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return userRepository.save(user);
+		Map<User, Boolean> ret = new HashMap<User, Boolean>();
+		ret.put(userRepository.save(user), existing);
+		
+        return ret;
 	}
 	
 	@Override
