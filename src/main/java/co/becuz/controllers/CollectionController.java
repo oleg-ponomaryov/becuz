@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import co.becuz.domain.Collection;
 import co.becuz.domain.nottables.CurrentUser;
 import co.becuz.dto.CollectionDTO;
+import co.becuz.dto.StatisticsDTO;
 import co.becuz.services.CollectionPhotosService;
 import co.becuz.services.CollectionService;
 import co.becuz.services.PhotoService;
@@ -42,6 +43,11 @@ public class CollectionController {
     @RequestMapping(value = "/collections", method=RequestMethod.GET)
     public @ResponseBody java.util.Collection<Collection> getAllCollectionsByUser(@ModelAttribute CurrentUser currentUser) {
         return collectionService.getAllCollectionsByUserId(currentUser.getId());
+    }
+
+    @RequestMapping(value = "/collections/statistics", method=RequestMethod.GET)
+    public @ResponseBody StatisticsDTO getStatisticsForUser(@ModelAttribute CurrentUser currentUser) {
+        return collectionService.getStatistics(currentUser.getUser());
     }
     
     @RequestMapping(value = "/collections",method=RequestMethod.POST)

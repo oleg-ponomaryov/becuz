@@ -1,9 +1,12 @@
 package co.becuz.controller;
 
+import static org.junit.Assert.assertEquals;
+
 import java.sql.Date;
 
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,12 +20,15 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import co.becuz.SpringBootWebApplication;
 import co.becuz.domain.Collection;
+import co.becuz.domain.Device;
 import co.becuz.domain.Frame;
 import co.becuz.domain.Photo;
 import co.becuz.domain.User;
+import co.becuz.domain.enums.DeviceType;
 import co.becuz.domain.enums.Role;
 import co.becuz.dto.PhotoDTO;
 import co.becuz.dto.PhotoUploadRequestDTO;
+import co.becuz.repositories.DeviceRepository;
 import co.becuz.repositories.FrameRepository;
 import co.becuz.repositories.PhotoRepository;
 import co.becuz.services.PhotoService;
@@ -40,19 +46,13 @@ import com.jayway.restassured.response.Response;
 @TestPropertySource(locations="classpath:application-test.properties")
 @WebAppConfiguration
 @IntegrationTest("server.port:0")
-public class PhotoControllerTest {
+public class DeviceControllerTest {
 
     @Autowired
     UserService service;
 
     @Autowired
-    FrameRepository frameRepository;
-
-    @Autowired
-    PhotoService photoService;
-
-    @Autowired
-    PhotoRepository photoRepository;
+    DeviceRepository deviceRepository;
     
     private static User ndemo;
 
@@ -68,87 +68,66 @@ public class PhotoControllerTest {
     		return;
     	}
 
-        ndemo = new User();
-        ndemo.setRole(Role.ADMIN);
-        ndemo.setUsername("ndemo");
-        ndemo.setPasswordHash("n$2a$10$ebyC4Z5WtCXXc.HGDc1Yoe6CLFzcntFmfse6/pTj7CeDY5I05w16C");
-        ndemo.setEmail("ndemo@quantlance.com");
-        ndemo.setPhotoUrl("http://");
-    	
-        service.save(ndemo);
-    	
         RestAssured.port = port;
         RestAssured.authentication = RestAssured.form("demo@quantlance.com", "demo", new FormAuthConfig("/login", "email", "password"));
         setUpIsDone = true;
     }
 
+    @After
+    public void tearDown() {
+    	deviceRepository.deleteAll();
+    }
+    
     @Test
-    public void uploadPhoto() throws JSONException{
-    	PhotoUploadRequestDTO dto = new PhotoUploadRequestDTO();
+    public void createDevice() throws JSONException{
     	
     	User u = new User();
         u.setRole(Role.ADMIN);
         u.setUsername("ndemo100");
         u.setPasswordHash("n$2a$10$ebyC4Z5WtCXXc.HGDc1Yoe6CLFzcntFmfse6/pTj7CeDY5I05w16C");
-        u.setEmail("ndemo10000@quantlance.com");
+        u.setEmail("ndemo100@quantlance.com");
         u.setPhotoUrl("http://");
         service.save(u);
-    	
-    	Frame frame = new Frame();
-    	frame.setUrl("http://becuz.net");
-    	frame = frameRepository.save(frame);
-    	
-    	Collection collection = new Collection();
-    	collection.setFrame(frame);
-    	collection.setHeadline("My headline");
-    	collection.setUser(u);
-    	
-    	dto.setCollection(collection);
-    	
+
+        Device d = new Device();
+        d.setDescription("My descr");
+        d.setDeviceType(DeviceType.IOS);
+        d.setToken("12121212");
+        d.setUser(u);
+        
     	Gson gson = new GsonBuilder().create();
-    	System.out.println("---------------->>"+gson.toJson(dto));
+    	System.out.println("---------------->>"+gson.toJson(d));
     	
-        Response resp = RestAssured.given().contentType("application/json\r\n").with().body(dto).when().post("/photo/upload");
+        Response resp = RestAssured.given().contentType("application/json\r\n").with().body(d).when().post("/devices");
         resp.prettyPrint();
+        
+        assertEquals(deviceRepository.findAllByUser(u).size(),1);
+        assertEquals(deviceRepository.findAllByUser(u).iterator().next().getToken(),"12121212");
         
        return;
     }
     
     @Test
-    public void updatePhoto() {
+    public void getDevices() {
+    	
+        User demo = service.getUserById("abc-edcv");
+    	
+        Device d = new Device();
+        d.setDescription("My descr33");
+        d.setDeviceType(DeviceType.IOS);
+        d.setToken("121212123333");
+        d.setUser(demo);
+        deviceRepository.save(d);
 
-    	User u = new User();
-        u.setRole(Role.ADMIN);
-        u.setUsername("ndemo100");
-        u.setPasswordHash("n$2a$10$ebyC4Z5WtCXXc.HGDc1Yoe6CLFzcntFmfse6/pTj7CeDY5I05w16C");
-        u.setEmail("ndemo100001@quantlance.com");
-        u.setPhotoUrl("http://");
-        service.save(u);
-    	
-    	Photo ph = new Photo();
-    	ph.setBucket("bucket");
-    	ph.setCaption("My caption");
-    	ph.setDescription("My Descr");
-    	ph.setMd5Digest("12345");
-    	ph.setOwner(u);
-    	ph.setOriginalKey("/upload/file");
-    	ph.setUploadedDate(new Date(20000L));
-    	photoService.save(ph);
-    	
-    	PhotoDTO phd = new PhotoDTO();
-    	phd.setCaption("My new caption");
-    	phd.setMd5Digest("54321");
-    	phd.setOwner(ndemo);
-    	phd.setId(ph.getId());
-    	
-        Response resp = RestAssured.given().contentType("application/json\r\n").with().body(phd).when().put("/photo/"+phd.getId());
+        assertEquals(deviceRepository.findAllByUser(demo).size(),1);
+        
+        Response resp = RestAssured.given().contentType("application/json\r\n").with().when().get("/devices");
         resp.prettyPrint();
         
         resp
         .then()
         .statusCode(HttpStatus.SC_OK)
-        .body("caption", Matchers.is("My new caption"))
-        .body("md5Digest", Matchers.is("54321"));
+        .body("token[0]", Matchers.is("121212123333"));
         return;
     }
 }

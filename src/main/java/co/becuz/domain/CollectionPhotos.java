@@ -1,25 +1,26 @@
 package co.becuz.domain;
 
-import javax.persistence.*;
-
-import org.hibernate.annotations.GenericGenerator;
-
-import co.becuz.configuration.SecurityConfiguration;
-import co.becuz.json.JsonDateSerializer;
-
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import co.becuz.json.JsonDateSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @Table(name = "collectionphotos", indexes = { @Index(name = "photo_collections_idx", columnList = "photo_id,collection_id"), @Index(name = "photo_collections_collection_idx", columnList = "collection_id")})

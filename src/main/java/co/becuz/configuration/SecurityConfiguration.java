@@ -107,6 +107,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/users/**").hasAuthority("ADMIN")
 				.antMatchers("/photo/**").hasAnyAuthority("ADMIN", "USER")
 				.antMatchers("/photos/**").hasAnyAuthority("ADMIN", "USER")
+				.antMatchers("/devices/**").hasAnyAuthority("ADMIN", "USER")
 				.antMatchers("/frames/all").permitAll()
 				.antMatchers("/frames/**").hasAnyAuthority("ADMIN", "USER")
 				.antMatchers(HttpMethod.GET, "/collections/{id}").permitAll()

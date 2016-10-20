@@ -132,6 +132,9 @@ public class User implements Serializable {
 	private Set<Photo> photos = new HashSet<Photo>();
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<Device> devices = new HashSet<Device>();
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<Collection> colections = new HashSet<Collection>();
 	
 	@PrePersist

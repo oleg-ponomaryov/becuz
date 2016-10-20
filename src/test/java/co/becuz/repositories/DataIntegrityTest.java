@@ -20,9 +20,11 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import co.becuz.SpringBootWebApplication;
 import co.becuz.domain.CollectionPhotos;
+import co.becuz.domain.Device;
 import co.becuz.domain.Frame;
 import co.becuz.domain.Photo;
 import co.becuz.domain.User;
+import co.becuz.domain.enums.DeviceType;
 import co.becuz.domain.enums.Role;
 import co.becuz.services.UserService;
 
@@ -42,6 +44,9 @@ public class DataIntegrityTest {
     @Autowired
     PhotoRepository photoRepository;
 
+    @Autowired
+    DeviceRepository deviceRepository;
+    
     @Autowired
     CollectionRepository collectionRepository;
 
@@ -96,6 +101,13 @@ public class DataIntegrityTest {
     	p0.setUploadedDate(new Date());
     	photoRepository.save(p0);
 
+       	Device d0 = new Device();
+    	d0.setDeviceType(DeviceType.IOS);
+    	d0.setToken("token1");
+    	d0.setDescription("Descr");
+    	d0.setUser(u);
+    	deviceRepository.save(d0);
+    	
     	Photo p1 = new Photo();
     	p1.setBucket("becuz2");
     	p1.setCaption("My caption2");
@@ -104,6 +116,13 @@ public class DataIntegrityTest {
     	p1.setOwner(u);
     	p1.setUploadedDate(new Date());
     	photoRepository.save(p1);
+
+       	Device d1 = new Device();
+    	d1.setDeviceType(DeviceType.IOS);
+    	d1.setToken("token2");
+    	d1.setDescription("Descr2");
+    	d1.setUser(u);
+    	deviceRepository.save(d1);
     	
     	Photo p = new Photo();
     	p.setBucket("becuz1");
@@ -113,13 +132,31 @@ public class DataIntegrityTest {
     	p.setOwner(ndemo);
     	p.setUploadedDate(new Date());
     	photoRepository.save(p);
+
+       	Device d = new Device();
+    	d.setDeviceType(DeviceType.IOS);
+    	d.setToken("token3");
+    	d.setDescription("Descr3");
+    	d.setUser(ndemo);
+    	deviceRepository.save(d);
     	
     	assertEquals(3, photoRepository.findAll().size());
+    	assertEquals(3, deviceRepository.findAll().size());
+    	
     	service.delete(ndemo.getId());
     	assertEquals(2, photoRepository.findAll().size());
+    	assertEquals(2, deviceRepository.findAll().size());
+    	
     	Collection<Photo> photos =  photoRepository.findAll();
     	for (Photo ph : photos) {
     		if (! ph.getId().equals(p0.getId()) && ! ph.getId().equals(p1.getId())) {
+    			fail("Unexpected Id");
+    		}
+    	}
+    	
+    	Collection<Device> devs =  deviceRepository.findAll();
+    	for (Device dv : devs) {
+    		if (! dv.getId().equals(d0.getId()) && ! dv.getId().equals(d1.getId())) {
     			fail("Unexpected Id");
     		}
     	}
@@ -175,9 +212,9 @@ public class DataIntegrityTest {
 
     	User u = new User();
         u.setRole(Role.ADMIN);
-        u.setUsername("ndemo300");
+        u.setUsername("ndemo3002");
         u.setPasswordHash("n$2a$10$ebyC4Z5WtCXXc.HGDc1Yoe6CLFzcntFmfse6/pTj7CeDY5I05w16C");
-        u.setEmail("ndemo300@quantlance.com");
+        u.setEmail("ndemo3002@quantlance.com");
         u.setPhotoUrl("http://");
         service.save(u);
     	
@@ -297,8 +334,8 @@ public class DataIntegrityTest {
 
     	Photo p0 = new Photo();
     	p0.setBucket("becuz0");
-    	p0.setCaption("My caption100");
-    	p0.setMd5Digest("eeeeee100");
+    	p0.setCaption("My caption1003");
+    	p0.setMd5Digest("eeeeee1003");
     	p0.setOriginalKey("/upload/file");
     	p0.setOwner(u);
     	p0.setUploadedDate(new Date());
@@ -306,8 +343,8 @@ public class DataIntegrityTest {
 
     	Photo p1 = new Photo();
     	p1.setBucket("becuz2");
-    	p1.setCaption("My caption200");
-    	p1.setMd5Digest("eeeeee200");
+    	p1.setCaption("My caption2001");
+    	p1.setMd5Digest("eeeeee2001");
     	p1.setOriginalKey("/upload/file");
     	p1.setOwner(u);
     	p1.setUploadedDate(new Date());
